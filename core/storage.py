@@ -30,14 +30,14 @@ class PythonStructRepository(RepositoryInterface):
         self.default_limit = default_limit
 
     def add(self, entity):
-        reference = getattr(entity, 'reference', None)
-        if reference is None:
-            entity.reference = max(self.db) + 1 if self.db else 0
-        self.db[entity.reference] = entity
+        pk = getattr(entity, 'pk', None)
+        if pk is None:
+            entity.pk = max(self.db) + 1 if self.db else 0
+        self.db[entity.pk] = entity
         return entity
 
-    def get(self, reference):
-        entity = self.db.get(reference)
+    def get(self, pk):
+        entity = self.db.get(pk)
         return entity
 
     def get_list(self, limit: int = None, offset: int = None, **params):
@@ -46,6 +46,6 @@ class PythonStructRepository(RepositoryInterface):
         entities = list(self.db.values())[offset: offset + limit]
         return entities
 
-    def delete(self, reference):
-        entity = self.db.pop(reference, None)
+    def delete(self, pk):
+        entity = self.db.pop(pk, None)
         return entity

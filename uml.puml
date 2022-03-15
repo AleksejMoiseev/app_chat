@@ -1,0 +1,49 @@
+@startuml
+entity "User"  {
+  * id : int
+  --
+  * username: str
+  * email: str
+  * password: str b64
+  * refresh_token: str None
+  * access_token: str
+  * created: data time
+}
+
+entity "Chat" {
+  * id : int
+  --
+  * title: str
+  * owner: id {User}
+'  * members: List[id] {User}
+'  * blacklisted: List[id] {User}
+'  * left_chat: List[id] {User}
+  * descriptions: text
+  * created: data time
+}
+
+entity "Message" {
+  * id : int
+  --
+  * user_id: int <<FK>> "User"
+  * chat: int <<FK>> "Chat"
+  * body:
+  * created: data time
+}
+
+entity "ChatMember" {
+  * id : int
+  --
+  * user_id: int <<FK>> "User"
+  * chat: int <<FK>>
+  * checked_in: data time
+  * checked_out: data time
+  * kicked_out: data time
+}
+
+User ||--{ "ChatMember"
+"ChatMember" }--|| "Chat"
+User ||--{ "Message"
+"Chat" ||--{ "Message"
+User ||--{ "Chat"
+@enduml

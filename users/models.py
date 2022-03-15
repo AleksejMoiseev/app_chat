@@ -17,9 +17,6 @@ class User(BaseModel):
     def user_serializer(cls, list_positions_values):
         return cls.serializer.serializer_data(data=list_positions_values)
 
-    def check_password(self, value):
-        return self.password == UserSerializer
-
 
 if __name__ == '__main__':
     values = ['Alex', 'alex@mail.ru', "qqqqq"]
