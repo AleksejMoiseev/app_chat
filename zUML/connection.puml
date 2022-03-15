@@ -8,6 +8,8 @@ entity "User"  {
   * refresh_token: str None
   * access_token: str
   * created: data time
+
+  __methods__
 }
 
 entity "Chat" {
@@ -15,11 +17,14 @@ entity "Chat" {
   --
   * title: str
   * owner: id {User}
-'  * members: List[id] {User}
-'  * blacklisted: List[id] {User}
-'  * left_chat: List[id] {User}
   * descriptions: text
-  * created: data time
+  * created: data
+
+  __methods
+  {method} + create_chat()
+  {method} + delete_chat()
+  {method} + update_chat(
+  {method} + get_info_by_chat()
 }
 
 entity "Message" {
@@ -29,6 +34,11 @@ entity "Message" {
   * chat: int <<FK>> "Chat"
   * body:
   * created: data time
+
+  __methods__
+
+  {method} + send_message(){user_id, chat_id}
+  {method} + get_message_by_user(){user_id, chat_id,  interval_time}
 }
 
 entity "ChatMember" {
@@ -39,6 +49,12 @@ entity "ChatMember" {
   * checked_in: data time
   * checked_out: data time
   * kicked_out: data time
+  __methods__
+
+  {method} + get_members()
+  {method} + leaving_chat()
+  {method} + create_member()
+  {method} + kicked_chat()
 }
 
 User ||--{ "ChatMember"

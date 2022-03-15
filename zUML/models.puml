@@ -1,0 +1,34 @@
+@startuml
+
+class User {
+..fields..
+{field} + username: str
+{field} + email: str
+{field} - password: str b64
+{field} - refresh_token: str None
+{field} - access_token: str None
+__methods__
+}
+
+class ChatMembers {
+..attributes..
+}
+
+class Chat {
+..attributes..
+{field} + title: str
+{field} + owner: id {User}
+{field} + members: List[id] {User}
+{field} - blacklisted: List[id] {User}
+
+__methods__
+{method} -execute_sql(sql: str, is_return: bool, data: tuple = None): Optional[list]
+}
+
+class Message {
+__methods__
+{method} + user: int(User):
+{method} + chat: int
+{method} + body: text
+}
+@enduml
