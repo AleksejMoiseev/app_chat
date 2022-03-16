@@ -3,8 +3,9 @@ from falcon import Request, Response
 
 from core.jwt import get_jwt_token, is_valid_refresh_token
 from core.utils import validate_data
-from users.models import User
-from users.service import USER_ORM
+from application.dto import User
+from application.serializer import UserSerializer
+from application.services import user_service
 
 
 class RegisterUser:
@@ -16,10 +17,10 @@ class RegisterUser:
         if not (email and password):
             raise falcon.HTTPUnauthorized(description='The request must contain a login and password')
         username = data.get('username') or email
-        serializer_data = User.serializer(username=username, email=email, password=password)
+        serializer_data = UserSerializer(username=username, email=email, password=password)
         cleaned_data = serializer_data.cleaned_data
         user = User(**cleaned_data)
-        user = USER_ORM.register(user)
+        user = user_service.register(user)
         user.refresh_token, user.access_token = get_jwt_token()
         resp.status = falcon.HTTP_200
         resp.body = {
@@ -38,8 +39,8 @@ class AuthView:
         if not (email and password):
             raise falcon.HTTPUnauthorized(description='The request must contain a login and password')
         username = data.get('username') or email
-        serializer_data = User.serializer(username=username, email=email, password=password)
-        users = USER_ORM.get_users()
+        serializer_data = UserSerializer(username=username, email=email, password=password)
+        users = user_service.get_users()
         user = None
         for user in users:
             if user.email == serializer_data.email and user.password == serializer_data.password:

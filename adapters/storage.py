@@ -49,3 +49,8 @@ class PythonStructRepository(RepositoryInterface):
     def delete(self, pk):
         entity = self.db.pop(pk, None)
         return entity
+
+
+user_storage = PythonStructRepository('users')
+message_storage = PythonStructRepository('message')
+chat_storage = PythonStructRepository('chat')

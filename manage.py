@@ -2,8 +2,8 @@ from gevent import monkey, pywsgi  # import the monkey for some patching as well
 monkey.patch_all()  # make sure to do the monkey-patching before loading the falcon package!
 import falcon  # once the patching is done, we can load the Falcon package
 from core.middleware import JSONTranslator
-from users.views import RegisterUser, AuthView
-from users.exceptions import EmailError
+from adapters.chat_api.auth import RegisterUser, AuthView
+from application.errors import EmailError
 
 
 middleware = [
