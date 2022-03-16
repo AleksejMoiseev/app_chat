@@ -4,3 +4,7 @@ ipython==8.1.1
 PyJWT==2.3.0
 pytest==7.0.1
 pydantic==1.9.0
+classic-http-api~=0.0.2
+classic-app-layer~=0.0.1
+classic-components~=0.0.1
+classic-aspects~=0.0.1

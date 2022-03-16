@@ -2,6 +2,7 @@ from typing import Text
 
 from core.models import BaseModel
 from datetime import datetime
+from classic.app.dto import DTO
 
 
 class Chat(BaseModel):
