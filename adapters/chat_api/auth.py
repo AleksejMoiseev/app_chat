@@ -1,7 +1,7 @@
 import falcon
 from falcon import Request, Response
 
-from core.jwt import get_jwt_token, is_valid_refresh_token
+from core.jwt import get_jwt_token, is_valid_refresh_token, get_jwt_by_payload
 from core.utils import validate_data
 from application.dto import User
 from application.serializer import UserSerializer
@@ -21,9 +21,11 @@ class RegisterUser:
         cleaned_data = serializer_data.cleaned_data
         user = User(**cleaned_data)
         user = user_service.register(user)
-        user.refresh_token, user.access_token = get_jwt_token()
+        user.refresh_token, _ = get_jwt_token()
+        user.access_token = get_jwt_by_payload({'pk': user.pk})
         resp.status = falcon.HTTP_200
         resp.body = {
+            'pk': user.pk,
             'username': user.username,
             'refresh_token': user.refresh_token,
             'access_token': user.access_token

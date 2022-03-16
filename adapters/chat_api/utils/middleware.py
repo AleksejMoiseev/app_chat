@@ -5,8 +5,9 @@ import falcon
 from falcon import Request, Response
 
 from core.auth_conf import jwt_skip_rules
-from core.jwt import is_valid_access_token
+from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
 from core.utils import validate_data
+from application.services import user_service
 
 
 class JSONTranslator:
@@ -29,7 +30,7 @@ def check_excluded_rules(method, path, config):
 class JWTUserAuthMiddleware:
 
     def process_resource(self, req: Request, resp: Response, resource, params):
-        print('!!!!!!!!!!!!')
+
         if check_excluded_rules(method=req.method, path=req.path, config=jwt_skip_rules):
             return
         data = req.get_header("Authorization", required=True).split(' ')
@@ -37,3 +38,10 @@ class JWTUserAuthMiddleware:
         token = token_auth["value"]
         if not is_valid_access_token(token):
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
+        payload = get_decode_jwt_by_payload(token) or None
+        req.context.user = user_service.get_user(payload['pk'])
+
+
+
+
+

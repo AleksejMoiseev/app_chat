@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Text, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Model(BaseModel):
@@ -16,20 +16,29 @@ class User(Model):
     refresh_token: str = None
 
 
-class Chat(BaseModel):
+class Chat(Model):
     title: str
-    owner_id: str
+    owner: int
     descriptions: Text
-    created = datetime.now()
+    created: datetime = Field(default_factory=datetime.now)
 
 
-class Message(BaseModel):
+class Message(Model):
     user_id: int
     chat_id: int
     body: Text
-    created = datetime.now()
+    created: datetime = Field(default_factory=datetime.now)
+
+
+class ChatMember(Model):
+    user_id: int
+    chat_id: int
+    checked_in: datetime = Field(default_factory=datetime.now)
+    checked_out: datetime = None
+    kicked: datetime = None
 
 
 if __name__ == '__main__':
-    User(username='aaa', email='ssss', password='ssss')
-    print(User)
+    d = {'chat_id': 1}
+    d = ChatMember(user_id=1, **d)
+    print(d.checked_in)

@@ -53,15 +53,3 @@ def is_valid_access_token(token):
     except (ExpiredSignatureError, InvalidSignatureError):
         return False
     return True
-
-
-def get_jwt_by_payload(payload):
-    return jwt.encode(
-        payload=payload,
-        key=JWT_PARAMETERS["key_access_token"],
-        algorithm=JWT_PARAMETERS['algorithms']
-    )
-
-
-def get_decode_jwt_by_payload(token):
-    return jwt.decode(jwt=token, key=JWT_PARAMETERS["key_access_token"], algorithms=['HS256', ])

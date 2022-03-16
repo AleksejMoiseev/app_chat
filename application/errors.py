@@ -1,4 +1,5 @@
 import falcon
+from classic.app.errors import AppError
 
 
 class EmailError(Exception):
@@ -7,3 +8,13 @@ class EmailError(Exception):
         resp.set_header("X-Custom-Header", "*")
         resp.body = f"Entity Not Found"
         resp.status = falcon.HTTP_404
+
+
+class UserNotFound(AppError):
+    msg_template = "UserNotFound"
+    code = 'UserNotFound'
+
+
+class ParamsIsNotValid(AppError):
+    msg_template = "ParamsIsNotValid"
+    code = 'ParamsIsNotValid'
