@@ -44,7 +44,8 @@ class ChatInteractor:
         messages = self.message.get_messages()
         messages_body = []
         for message in messages:
-            messages_body.append(message.body)
+            if message.chat_id == chat_id and message.user_id == user_id:
+                messages_body.append(message.body)
         return messages_body
 
 
@@ -178,7 +179,6 @@ class ListMessages:
         member = req.context.user
         change_chat = ChatsChange(pk=chat_id)
         chat = chat_app.get_chat(change_chat.pk)
-        print('@@@@@', chat, member)
         if not chat_app.is_member(member, chat):
             raise falcon.HTTPInvalidParam(param_name='chat_id', msg='Do not belong')
         messages = chat_app.get_messages_by_chat_id(user_id=member.pk, chat_id=change_chat.pk)
@@ -194,7 +194,6 @@ class CreateMessage:
         params = req.get_media()
         message = MessageValidator(user_id=member.pk, **params)
         chat = chat_app.get_chat(message.chat_id)
-        print('!!!!!!!!!', message, chat)
 
         if not chat:
             raise falcon.HTTPBadRequest()
@@ -204,18 +203,12 @@ class CreateMessage:
 
         message_cleaned_data = message.dict()
         message = Message(**message_cleaned_data)
-
         message_created = chat_app.send_message(message)
         resp.body = {
             'id': message_created.pk,
             'message': message_created.body
         }
         resp.status = falcon.HTTP_201
-
-
-
-
-
 
 
 class OwnerMemberCreate:
@@ -251,35 +244,6 @@ class OwnerMemberDelete:
                 chat_member.kicked = datetime.now()
                 resp.body = f"member{chat_member.pk} delete success"
                 resp.status = falcon.HTTP_200
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
