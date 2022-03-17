@@ -1,21 +1,39 @@
-import requests
-from http import HTTPStatus
+import pytest
 
+from application.services import user_service
 
 Base_URL = 'http://127.0.0.1:8080/'
 
 
-def test_positive_create_chat(expected_value_for_create):
-    assert expected_value_for_create == {"id": 1, "name": 'issue_Alex'}
+"""testing user service"""
 
 
-def test_create_chat(headers_auth):
-    prefix = 'chats'
-    path = Base_URL + prefix
-    params = {
-        'title': 'title',
-        'descriptions': 'descriptions',
-    }
+def test_register_user(user):
+    actor = user_service.register(user)
+    assert actor.pk == 0
 
-    resp = requests.post(path, params, headers=headers_auth)
-    assert resp.status_code == 201
+
+def test_get_user(user):
+    actor = user_service.get_user(pk=0)
+    assert actor.username == user.username
+    assert actor.email == user.email
+    assert actor.password == user.password
+    assert actor.access_token == user.access_token
+
+
+def test_get_users(users):
+    users, size = users
+    actors = []
+    for actor in users:
+        user_service.register(actor)
+        actors.append(user_service.register(actor))
+    assert len(actors) == size
+
+
+@pytest.mark.parametrize('limit', [1, 2, 3])
+def test_get_users_by_limit(limit):
+    size = user_service.get_users(limit=limit)
+    assert len(size) == limit
+
+
+"""Testing MessageService"""

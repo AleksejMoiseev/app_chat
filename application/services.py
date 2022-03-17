@@ -16,7 +16,7 @@ class ChatsChange(DTO):
 class MessageValidator(DTO):
     user_id: int
     chat_id: int
-    body: str = ''
+    body: str = None
 
 
 class ChatMemberValidator(DTO):

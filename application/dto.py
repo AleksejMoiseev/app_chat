@@ -47,4 +47,3 @@ class ChatMember(Model):
 if __name__ == '__main__':
     d = {'chat_id': 1}
     d = ChatMember(user_id=1, **d)
-    print(d.checked_in)

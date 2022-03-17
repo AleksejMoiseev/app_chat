@@ -1,7 +1,6 @@
 import jwt
 import datetime
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
-
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 
 JWT_PARAMETERS = {
     "lifetime": {'days': 1},
@@ -50,7 +49,7 @@ def is_valid_access_token(token):
             key=JWT_PARAMETERS["key_access_token"],
             algorithms=[JWT_PARAMETERS["algorithms"], ]
         )
-    except (ExpiredSignatureError, InvalidSignatureError):
+    except (ExpiredSignatureError, InvalidSignatureError, DecodeError):
         return False
     return True
 

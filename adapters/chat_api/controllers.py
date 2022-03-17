@@ -47,7 +47,7 @@ class ChatInteractor:
         messages_body = []
         for message in messages:
             if message.chat_id == chat_id and message.user_id == user_id:
-                messages_body.append(message.body)
+                messages_body.append(message)
         return messages_body
 
     def get_members_by_chat(self, chat_id):
@@ -109,11 +109,8 @@ class Chats:
         data = req.get_media()
         chat = Chat(owner=user.pk, **data)
         chat = chat_app.create_chat(chat)
-        resp.body = {'chat': chat.pk}
+        resp.body = chat.dict()
         resp.status = falcon.HTTP_201
-
-    def on_get_message(self, req: Request, resp: Response):
-        pass
 
 
 class ChangeChats:
@@ -129,12 +126,11 @@ class ChangeChats:
         if not chat_app.is_owner(owner, chat):
             raise BadRequest()
         cleaned_data = change_chat.dict()
-        for field in cleaned_data:
-            value = cleaned_data[field]
-            if not value:
+        for field, value in cleaned_data.items():
+            if value is None:
                 continue
             setattr(chat, field, value)
-        resp.body = {'title': chat.title, 'descriptions': chat.descriptions}
+        resp.body = chat.dict()
         resp.status = falcon.HTTP_200
 
     def on_patch(self, req: Request, resp: Response, chat_id):
@@ -147,14 +143,11 @@ class ChangeChats:
         if not chat_app.is_owner(owner, chat):
             raise BadRequest()
         deleted_chat = chat_app.delete_chat(chat.pk)
-        resp.body = {
-            'deleted': 'success',
-            'id': deleted_chat.pk
-        }
-        resp.status = falcon.HTTP_201
+        resp.body = deleted_chat.dict()
+        resp.status = falcon.HTTP_200
 
 
-class ActionsMembers:
+class GetChatInfoMembers:
 
     def on_get(self, req: Request, resp: Response, chat_id):
         user = req.context.user
@@ -164,9 +157,7 @@ class ActionsMembers:
             raise BadRequest()
         if not chat_app.is_member(user.pk, chat.pk):
             raise BadRequest()
-        resp.body = {
-            'chat_info': [chat.title, chat.descriptions]
-        }
+        resp.body = chat.dict()
         resp.status = falcon.HTTP_200
 
 
@@ -179,9 +170,8 @@ class GetAllMembers:
         if not chat_app.is_member(user.pk, chat.pk):
             raise BadRequest()
         members = chat_app.get_members_by_chat(chat.pk)
-        idx = [member.pk for member in members]
         resp.body = {
-            'members': idx,
+            'members': members,
         }
         resp.status = falcon.HTTP_200
 
@@ -225,10 +215,7 @@ class CreateMessage:
         message_cleaned_data = message.dict()
         message = Message(**message_cleaned_data)
         message_created = chat_app.send_message(message)
-        resp.body = {
-            'id': message_created.pk,
-            'message': message_created.body
-        }
+        resp.body = message_created.dict()
         resp.status = falcon.HTTP_201
 
 
@@ -265,12 +252,3 @@ class OwnerMemberDelete:
                 chat_member.kicked = datetime.now()
                 resp.body = f"member{chat_member.pk} delete success"
                 resp.status = falcon.HTTP_200
-
-
-if __name__ == '__main__':
-    parametr = {
-        "title": "My_chat",
-        "descriptions": "My descriptions",
-        "owner_id": 0,
-    }
-    chat = Chat(**parametr)

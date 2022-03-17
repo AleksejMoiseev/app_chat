@@ -1,3 +1,4 @@
+import datetime
 import json
 import re
 
@@ -11,16 +12,63 @@ from application.services import user_service
 from application.dto import Model, ChatMember
 
 
-class ChatSerializer(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, list):
-            print('!!!!!!!', str(o))
-            return 'ssssssssss'
-        if isinstance(o, Model):
-            print('!!!!!!!', str(o))
-            return o.pk
-        return super().default(o)
+def _get_duration_components(duration):
+    days = duration.days
+    seconds = duration.seconds
+    microseconds = duration.microseconds
 
+    minutes = seconds // 60
+    seconds = seconds % 60
+
+    hours = minutes // 60
+    minutes = minutes % 60
+
+    return days, hours, minutes, seconds, microseconds
+
+
+def duration_iso_string(duration):
+    if duration < datetime.timedelta(0):
+        sign = '-'
+        duration *= -1
+    else:
+        sign = ''
+
+    days, hours, minutes, seconds, microseconds = _get_duration_components(duration)
+    ms = '.{:06d}'.format(microseconds) if microseconds else ""
+    return '{}P{}DT{:02d}H{:02d}M{:02d}{}S'.format(sign, days, hours, minutes, seconds, ms)
+
+
+class DjangoJSONEncoder(json.JSONEncoder):
+    """
+    JSONEncoder subclass that knows how to encode date/time
+    """
+    def default(self, o):
+        # See "Date Time String Format" in the ECMA-262 specification.
+        if isinstance(o, datetime.datetime):
+            r = o.isoformat()
+            if o.microsecond:
+                r = r[:23] + r[26:]
+            if r.endswith('+00:00'):
+                r = r[:-6] + 'Z'
+            return r
+        elif isinstance(o, datetime.date):
+            return o.isoformat()
+        elif isinstance(o, datetime.time):
+            r = o.isoformat()
+            if o.microsecond:
+                r = r[:12]
+            return r
+        elif isinstance(o, datetime.timedelta):
+            return duration_iso_string(o)
+        else:
+            return super().default(o)
+
+
+class ChatSerializer(DjangoJSONEncoder):
+    def default(self, o):
+        if isinstance(o, Model):
+            return o.dict()
+        return super().default(o)
 
 
 class JSONTranslator:
@@ -52,6 +100,9 @@ class JWTUserAuthMiddleware:
         if not is_valid_access_token(token):
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
         payload = get_decode_jwt_by_payload(token) or None
+        user = user_service.get_user(payload['pk'])
+        if not user:
+            raise falcon.HTTPUnauthorized(description='Invalid headers token')
         req.context.user = user_service.get_user(payload['pk'])
 
 
