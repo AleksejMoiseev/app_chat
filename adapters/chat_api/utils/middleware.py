@@ -8,13 +8,26 @@ from core.auth_conf import jwt_skip_rules
 from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
 from core.utils import validate_data
 from application.services import user_service
+from application.dto import Model, ChatMember
+
+
+class ChatSerializer(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, list):
+            print('!!!!!!!', str(o))
+            return 'ssssssssss'
+        if isinstance(o, Model):
+            print('!!!!!!!', str(o))
+            return o.pk
+        return super().default(o)
+
 
 
 class JSONTranslator:
 
     def process_response(self, req, resp, resource, req_succeeded):
         resp.set_header('Content-Type', 'application/json')
-        resp.body = json.dumps(resp.body)
+        resp.body = json.dumps(resp.body, cls=ChatSerializer)
 
 
 def check_excluded_rules(method, path, config):

@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field
 class Model(BaseModel):
     pk: int = None
 
+    def __str__(self):
+        return f"{self.pk}"
+
 
 class User(Model):
     username: str
@@ -21,6 +24,9 @@ class Chat(Model):
     owner: int
     descriptions: Text
     created: datetime = Field(default_factory=datetime.now)
+
+    def __str__(self):
+        return f"{self.pk}"
 
 
 class Message(Model):

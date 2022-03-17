@@ -1,6 +1,20 @@
-from adapters.storage import user_storage, message_storage, chat_storage, chat_member_storage
+from composites.repositories import user_storage, message_storage, chat_storage, chat_member_storage
 from application.dto import User, Message, Chat, ChatMember
 from application.interfaces import ServiceInterface
+
+from classic.app.dto import DTO
+
+
+class ChatsChange(DTO):
+    pk: int
+    title: str = None
+    descriptions: str = None
+
+
+class MessageValidator(DTO):
+    user_id: int
+    chat_id: int
+    body: str = ''
 
 
 class UserService(ServiceInterface):

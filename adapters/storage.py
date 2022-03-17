@@ -1,24 +1,5 @@
-import abc
 from collections import defaultdict
-
-
-class RepositoryInterface(metaclass=abc.ABCMeta):
-
-    @abc.abstractmethod
-    def add(self, entity):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get(self, reference):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_list(self, limit: int = None, offset: int = None, **params):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def delete(self, reference):
-        raise NotImplementedError
+from application.interfaces import RepositoryInterface
 
 
 _registry = defaultdict(dict)
@@ -49,9 +30,3 @@ class PythonStructRepository(RepositoryInterface):
     def delete(self, pk):
         entity = self.db.pop(pk, None)
         return entity
-
-
-user_storage = PythonStructRepository('users')
-message_storage = PythonStructRepository('message')
-chat_storage = PythonStructRepository('chat')
-chat_member_storage = PythonStructRepository("chat_member")

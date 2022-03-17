@@ -1,15 +1,29 @@
 import abc
 from datetime import datetime
 
-from adapters.storage import RepositoryInterface
-from application.dto import User, Message
-#from application.services import ChatMemberService, ChatService, MessageService
+
+class RepositoryInterface(metaclass=abc.ABCMeta):
+
+    @abc.abstractmethod
+    def add(self, entity):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, reference):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_list(self, limit: int = None, offset: int = None, **params):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, reference):
+        raise NotImplementedError
 
 
 class ServiceInterface(abc.ABC):
     def __init__(self, repository: RepositoryInterface):
         self._repository = repository
-
 
 # class ChatInteractor:
 #     def __init__(self, chat_member: ChatMemberService, chat: ChatService, message: MessageService,):
