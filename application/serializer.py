@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from pydantic import validator
 from pydantic.annotated_types import Any
 
-from application.errors import EmailError
+from application.errors import BadRequest
 
 
 class ModelSerializer(BaseModel):
@@ -49,7 +49,7 @@ class UserSerializer(ModelSerializer):
         regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
         if re.fullmatch(regex, value):
             return value
-        raise EmailError()
+        raise BadRequest()
 
     @validator('password')
     def clean_password(cls, value: str):

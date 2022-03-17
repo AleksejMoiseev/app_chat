@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from composites.repositories import user_storage, message_storage, chat_storage, chat_member_storage
 from application.dto import User, Message, Chat, ChatMember
 from application.interfaces import ServiceInterface
@@ -15,6 +17,14 @@ class MessageValidator(DTO):
     user_id: int
     chat_id: int
     body: str = ''
+
+
+class ChatMemberValidator(DTO):
+    user_id: int
+    chat_id: int
+    checked_in: datetime = None
+    checked_out: datetime = None
+    kicked: datetime = None
 
 
 class UserService(ServiceInterface):
@@ -69,6 +79,9 @@ class ChatMemberService(ServiceInterface):
     def create_members(self, chat_member: ChatMember):
         chat_member = self._repository.add(chat_member)
         return chat_member
+
+    def get_member(self, pk):
+        return self._repository.get(pk)
 
 
 user_service = UserService(repository=user_storage)

@@ -1,17 +1,15 @@
-from typing import List
+from datetime import datetime
 
-from pydantic import ValidationError
 import falcon
+from falcon import Request, Response
 
 from application.dto import User, Message, Chat, ChatMember
-from application.errors import ParamsIsNotValid
+from application.errors import BadRequest
 from application.services import (
     ChatMemberService, ChatService, MessageService,
     chat_service, chat_member_service, message_service,
     user_service, ChatsChange, MessageValidator
 )
-from datetime import datetime
-from falcon import Request, Response
 
 
 class ChatInteractor:
@@ -32,6 +30,10 @@ class ChatInteractor:
         return chat
 
     def delete_chat(self, chat_id):
+        members = self.chat_member.get_members()
+        for member in members:
+            if member.chat_id == chat_id:
+                member.kicked = datetime.now()
         return self.chat.delete_chat(chat_id)
 
     def past_message(self, interval: datetime, chat_id: int):
@@ -40,22 +42,20 @@ class ChatInteractor:
     def send_message(self, message: Message):
         return self.message.send_message(message)
 
-    def get_messages_by_chat_id(self, user_id, chat_id):
-        messages = self.message.get_messages()
+    def get_messages_by_chat_id(self, user_id, chat_id, limit, offset):
+        messages = self.message.get_messages(limit=limit, offset=offset)
         messages_body = []
         for message in messages:
             if message.chat_id == chat_id and message.user_id == user_id:
                 messages_body.append(message.body)
         return messages_body
 
-
-
     def get_members_by_chat(self, chat_id):
         members_all = self.chat_member.get_members()
         members = []
         for member in members_all:
-            if member.chat_id == chat_id:
-                members.append(member.pk)
+            if member.chat_id == chat_id and not member.kicked:
+                members.append(member)
         return members
 
     def get_user(self, pk):
@@ -74,14 +74,24 @@ class ChatInteractor:
     def get_members(self):
         return self.chat_member.get_members()
 
+    def get_member(self, user_id):
+        member = self.chat_member.get_member(user_id)
+        if not member:
+            raise ValueError('Member not found')
+        return member
+
     @staticmethod
     def is_owner(owner: User, chat: Chat):
         if owner.pk == chat.owner:
             return True
         return False
 
-    def is_member(self, member, chat):
-        return self.is_owner(member, chat)
+    def is_member(self, user_id, chat_id):
+        members_by_chat = self.get_members_by_chat(chat_id)
+        for member in members_by_chat:
+            if user_id == member.user_id:
+                return True
+        return False
 
 
 chat_app = ChatInteractor(
@@ -114,10 +124,10 @@ class ChangeChats:
         change_chat = ChatsChange(pk=chat_id, **params)
         chat = chat_app.get_chat(change_chat.pk)
         if not chat:
-            raise falcon.HTTPBadRequest()
+            raise BadRequest()
         owner = req.context.user
         if not chat_app.is_owner(owner, chat):
-            raise falcon.HTTPBadRequest()
+            raise BadRequest()
         cleaned_data = change_chat.dict()
         for field in cleaned_data:
             value = cleaned_data[field]
@@ -135,7 +145,7 @@ class ChangeChats:
         change_chat = ChatsChange(pk=chat_id)
         chat = chat_app.get_chat(change_chat.pk)
         if not chat_app.is_owner(owner, chat):
-            raise falcon.HTTPInvalidParam(param_name='chat_id', msg='Do not belong')
+            raise BadRequest()
         deleted_chat = chat_app.delete_chat(chat.pk)
         resp.body = {
             'deleted': 'success',
@@ -147,11 +157,13 @@ class ChangeChats:
 class ActionsMembers:
 
     def on_get(self, req: Request, resp: Response, chat_id):
-        member = req.context.user
+        user = req.context.user
         change_chat = ChatsChange(pk=chat_id)
         chat = chat_app.get_chat(change_chat.pk)
-        if not chat_app.is_member(member, chat):
-            raise falcon.HTTPInvalidParam(param_name='chat_id', msg='Do not belong')
+        if not chat:
+            raise BadRequest()
+        if not chat_app.is_member(user.pk, chat.pk):
+            raise BadRequest()
         resp.body = {
             'chat_info': [chat.title, chat.descriptions]
         }
@@ -161,14 +173,15 @@ class ActionsMembers:
 class GetAllMembers:
 
     def on_get(self, req: Request, resp: Response, chat_id):
-        member = req.context.user
+        user = req.context.user
         change_chat = ChatsChange(pk=chat_id)
         chat = chat_app.get_chat(change_chat.pk)
-        if not chat_app.is_member(member, chat):
-            raise falcon.HTTPInvalidParam(param_name='chat_id', msg='Do not belong')
+        if not chat_app.is_member(user.pk, chat.pk):
+            raise BadRequest()
         members = chat_app.get_members_by_chat(chat.pk)
+        idx = [member.pk for member in members]
         resp.body = {
-            'members': members,
+            'members': idx,
         }
         resp.status = falcon.HTTP_200
 
@@ -176,12 +189,21 @@ class GetAllMembers:
 class ListMessages:
 
     def on_get(self, req: Request, resp: Response, chat_id):
-        member = req.context.user
+        limit = req.get_param_as_int('limit')
+        offset = req.get_param_as_int('offset')
+        user = req.context.user
         change_chat = ChatsChange(pk=chat_id)
         chat = chat_app.get_chat(change_chat.pk)
-        if not chat_app.is_member(member, chat):
-            raise falcon.HTTPInvalidParam(param_name='chat_id', msg='Do not belong')
-        messages = chat_app.get_messages_by_chat_id(user_id=member.pk, chat_id=change_chat.pk)
+        if not chat:
+            raise BadRequest()
+        if not chat_app.is_member(user.pk, chat.pk):
+            raise BadRequest()
+        messages = chat_app.get_messages_by_chat_id(
+            user_id=user.pk,
+            chat_id=change_chat.pk,
+            limit=limit,
+            offset=offset
+        )
         resp.body = {
             'messages': messages
         }
@@ -190,16 +212,15 @@ class ListMessages:
 
 class CreateMessage:
     def on_post(self, req: Request, resp: Response):
-        member = req.context.user
+        user = req.context.user
         params = req.get_media()
-        message = MessageValidator(user_id=member.pk, **params)
+        message = MessageValidator(user_id=user.pk, **params)
         chat = chat_app.get_chat(message.chat_id)
-
         if not chat:
-            raise falcon.HTTPBadRequest()
+            raise BadRequest()
 
-        if not chat_app.is_member(member, chat):
-            raise falcon.HTTPBadRequest()
+        if not chat_app.is_member(user.pk, chat.pk):
+            raise BadRequest()
 
         message_cleaned_data = message.dict()
         message = Message(**message_cleaned_data)
@@ -253,5 +274,3 @@ if __name__ == '__main__':
         "owner_id": 0,
     }
     chat = Chat(**parametr)
-    print(chat_app.create_chat(chat=chat))
-    print(chat.created)

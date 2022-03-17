@@ -1,6 +1,7 @@
 from gevent import monkey, pywsgi  # import the monkey for some patching as well as the WSGI server
 
 from adapters.chat_api.controllers import Chats, ChangeChats, ActionsMembers, GetAllMembers, ListMessages, CreateMessage
+from application.errors import BadRequest
 
 monkey.patch_all()  # make sure to do the monkey-patching before loading the falcon package!
 import falcon  # once the patching is done, we can load the Falcon package
@@ -17,13 +18,15 @@ middleware = [
 
 
 def handle(req, resp, ex, params):
-    raise falcon.HTTPError(falcon.HTTP_792)
+    raise falcon.HTTPError(falcon.HTTPBadRequest)
 
 
 api = falcon.API(middleware=middleware)
 
 """Exceptions"""
 api.add_error_handler(ValidationError, handle)
+api.add_error_handler(BadRequest)
+
 
 
 
