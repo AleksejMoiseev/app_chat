@@ -1,6 +1,9 @@
 from collections import defaultdict
 
-from application.interfaces import RepositoryInterface
+from application.interfaces import (
+    RepositoryInterface, UserRepositoryInterface, ChatMembersRepositoryInterface,
+    MessageRepositoryInterface, ChatRepositoryInterface
+)
 
 _registry = defaultdict(dict)
 
@@ -30,3 +33,19 @@ class PythonStructRepository(RepositoryInterface):
     def delete(self, pk):
         entity = self.db.pop(pk, None)
         return entity
+
+
+class UserPythonStructRepository(UserRepositoryInterface, PythonStructRepository):
+    pass
+
+
+class ChatPythonStructRepository(ChatRepositoryInterface, PythonStructRepository):
+    pass
+
+
+class ChatMemberPythonStructRepository(ChatMembersRepositoryInterface, PythonStructRepository):
+    pass
+
+
+class MessagePythonStructRepository(MessageRepositoryInterface, PythonStructRepository):
+    pass

@@ -20,6 +20,22 @@ class RepositoryInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
+class UserRepositoryInterface(abc.ABC, RepositoryInterface):
+    pass
+
+
+class ChatRepositoryInterface(abc.ABC, RepositoryInterface):
+    pass
+
+
+class ChatMembersRepositoryInterface(abc.ABC, RepositoryInterface):
+    pass
+
+
+class MessageRepositoryInterface(abc.ABC, RepositoryInterface):
+    pass
+
+
 class ServiceInterface(abc.ABC):
     def __init__(self, repository: RepositoryInterface):
         self._repository = repository

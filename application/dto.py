@@ -42,9 +42,3 @@ class ChatMember(Model):
     checked_in: datetime = Field(default_factory=datetime.now)
     checked_out: datetime = None
     kicked: datetime = None
-
-
-if __name__ == '__main__':
-    d = {'user_id': 1, 'chat_id': 0, 'checked_in': None, 'checked_out': None, 'kicked': None}
-    d = ChatMember(**d)
-    print(d)

@@ -36,4 +36,7 @@ def test_get_users_by_limit(limit):
     assert len(size) == limit
 
 
-"""Testing MessageService"""
+"""Testing ChatService"""
+
+def test_create_chat(chat):
+    pass

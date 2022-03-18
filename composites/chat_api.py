@@ -1,21 +1,17 @@
-from adapters.storage.storage import PythonStructRepository
-from application.services import UserService, MessageService, ChatService, ChatMemberService, ChatInteractor
+from adapters.storage.storage import (
+    UserPythonStructRepository, MessagePythonStructRepository,
+    ChatMemberPythonStructRepository, ChatPythonStructRepository,
+)
+from application.services import UserService, MessageService, ChatService, ChatMemberService
 
-user_storage = PythonStructRepository('users')
-message_storage = PythonStructRepository('message')
-chat_storage = PythonStructRepository('chat')
-chat_member_storage = PythonStructRepository("chat_member")
+user_storage = UserPythonStructRepository('users')
+message_storage = MessagePythonStructRepository('message')
+chat_storage = ChatPythonStructRepository('chat')
+chat_member_storage = ChatMemberPythonStructRepository("chat_member")
 
 
 user_service = UserService(repository=user_storage)
-message_service = MessageService(repository=message_storage)
-chat_service = ChatService(repository=chat_storage)
+message_service = MessageService(messages_repo=message_storage)
+chat_service = ChatService(chats_repo=chat_storage, members_repo=chat_member_storage)
 chat_member_service = ChatMemberService(repository=chat_member_storage)
 
-
-chat_app = ChatInteractor(
-    chat_member=chat_member_service,
-    chat=chat_service,
-    message=message_service,
-    user_service=user_service
-)

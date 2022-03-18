@@ -1,5 +1,5 @@
 import pytest
-from application.dto import User
+from application.dto import User, Chat
 
 ACCESS_TOKEN = " Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwayI6MH0.99Q7zHnAZVqblwg93gjXYRCB-LmOuhfWjWWqx0ei5fg"
 REFRESH_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" \
@@ -47,12 +47,25 @@ def users(params):
 
 
 @pytest.fixture
-def params_chat():
+def owner(user):
+    user.pk = 0
+    return user
+
+
+@pytest.fixture
+def params_chat(owner):
     return {
         'title': "title",
         'descriptions': 'descriptions',
-        'owner': 0
+        'owner': owner.pk
     }
+
+
+@pytest.fixture
+def chat(params_chat):
+    return Chat(**params_chat)
+
+
 
 
 def params_message(user, ):
