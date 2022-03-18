@@ -5,11 +5,11 @@ import re
 import falcon
 from falcon import Request, Response
 
+from application.dto import Model
+from composites.services import user_service
 from core.auth_conf import jwt_skip_rules
 from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
 from core.utils import validate_data
-from application.services import user_service
-from application.dto import Model, ChatMember
 
 
 def _get_duration_components(duration):

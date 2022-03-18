@@ -1,10 +1,8 @@
 from datetime import datetime
 
-from composites.repositories import user_storage, message_storage, chat_storage, chat_member_storage
-from application.dto import User, Message, Chat, ChatMember
-from application.interfaces import ServiceInterface
-
 from classic.app.dto import DTO
+
+from application.dto import User, Message, Chat, ChatMember
 
 
 class ChatsChange(DTO):
@@ -26,7 +24,11 @@ class ChatMemberValidator(DTO):
     kicked: datetime = None
 
 
-class UserService(ServiceInterface):
+class UserService:
+
+    def __init__(self, repository):
+        self._repository = repository
+
     def register(self, user: User):
         user = self._repository.add(user)
         return user
@@ -40,7 +42,10 @@ class UserService(ServiceInterface):
         return users
 
 
-class MessageService(ServiceInterface):
+class MessageService:
+    def __init__(self, repository):
+        self._repository = repository
+
     def send_message(self, message: Message):
         message = self._repository.add(message)
         return message
@@ -50,7 +55,10 @@ class MessageService(ServiceInterface):
         return messages
 
 
-class ChatService(ServiceInterface):
+class ChatService:
+    def __init__(self, repository):
+        self._repository = repository
+
     def create_chat(self, chat: Chat):
         chat = self._repository.add(chat)
         return chat
@@ -70,7 +78,11 @@ class ChatService(ServiceInterface):
         return chats
 
 
-class ChatMemberService(ServiceInterface):
+class ChatMemberService:
+
+    def __init__(self, repository):
+        self._repository = repository
+
     def get_members(self, limit=None, offset=None, **params):
         members = self._repository.get_list(limit=limit, offset=offset, **params)
         return members
@@ -85,9 +97,3 @@ class ChatMemberService(ServiceInterface):
     def delete_member(self, pk):
         chat_member = self._repository.delete(pk)
         return chat_member
-
-
-user_service = UserService(repository=user_storage)
-message_service = MessageService(repository=message_storage)
-chat_service = ChatService(repository=chat_storage)
-chat_member_service = ChatMemberService(repository=chat_member_storage)

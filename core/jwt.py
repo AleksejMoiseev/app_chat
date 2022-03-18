@@ -1,5 +1,6 @@
-import jwt
 import datetime
+
+import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 
 JWT_PARAMETERS = {

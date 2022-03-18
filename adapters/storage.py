@@ -1,6 +1,6 @@
 from collections import defaultdict
-from application.interfaces import RepositoryInterface
 
+from application.interfaces import RepositoryInterface
 
 _registry = defaultdict(dict)
 

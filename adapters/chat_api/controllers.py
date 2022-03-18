@@ -7,9 +7,9 @@ from application.dto import User, Message, Chat, ChatMember
 from application.errors import BadRequest
 from application.services import (
     ChatMemberService, ChatService, MessageService,
-    chat_service, chat_member_service, message_service,
-    user_service, ChatsChange, MessageValidator, ChatMemberValidator
+    ChatsChange, MessageValidator, ChatMemberValidator
 )
+from composites.services import user_service, message_service, chat_service, chat_member_service
 
 
 class ChatInteractor:
@@ -242,7 +242,7 @@ class OwnerMemberDeleteADD:
         resp.status = falcon.HTTP_201
 
     def on_delete(self, req: Request, resp: Response):
-        """TODO: deleted member"""
+        """TODO: deleted member and testing"""
         owner = req.context.user
         data = req.get_media()
         cleaned_data = ChatMemberValidator(**data).dict()

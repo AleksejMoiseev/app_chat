@@ -1,11 +1,11 @@
 import falcon
 from falcon import Request, Response
 
-from core.jwt import get_jwt_token, is_valid_refresh_token, get_jwt_by_payload
-from core.utils import validate_data
 from application.dto import User
 from application.serializer import UserSerializer
-from application.services import user_service
+from composites.services import user_service
+from core.jwt import get_jwt_token, is_valid_refresh_token, get_jwt_by_payload
+from core.utils import validate_data
 
 
 class RegisterUser:
