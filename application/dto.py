@@ -45,5 +45,6 @@ class ChatMember(Model):
 
 
 if __name__ == '__main__':
-    d = {'chat_id': 1}
-    d = ChatMember(user_id=1, **d)
+    d = {'user_id': 1, 'chat_id': 0, 'checked_in': None, 'checked_out': None, 'kicked': None}
+    d = ChatMember(**d)
+    print(d)

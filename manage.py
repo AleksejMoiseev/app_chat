@@ -1,7 +1,7 @@
 from gevent import monkey, pywsgi  # import the monkey for some patching as well as the WSGI server
 
 from adapters.chat_api.controllers import Chats, ChangeChats, GetAllMembers, ListMessages, \
-    CreateMessage, GetChatInfoMembers
+    CreateMessage, GetChatInfoMembers, OwnerMemberDeleteADD
 from application.errors import BadRequest
 
 monkey.patch_all()  # make sure to do the monkey-patching before loading the falcon package!
@@ -19,7 +19,7 @@ middleware = [
 
 
 def handle(req, resp, ex, params):
-    raise falcon.HTTPError(falcon.HTTPBadRequest)
+    raise falcon.HTTPError(falcon.falcon.HTTP_792)
 
 
 api = falcon.API(middleware=middleware)
@@ -40,6 +40,7 @@ api.add_route("/info/{chat_id}", GetChatInfoMembers())
 api.add_route("/members/{chat_id}", GetAllMembers())
 api.add_route("/messages/{chat_id}", ListMessages())
 api.add_route("/messages", CreateMessage())
+api.add_route("/members", OwnerMemberDeleteADD())
 
 
 

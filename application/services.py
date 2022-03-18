@@ -22,7 +22,6 @@ class MessageValidator(DTO):
 class ChatMemberValidator(DTO):
     user_id: int
     chat_id: int
-    checked_in: datetime = None
     checked_out: datetime = None
     kicked: datetime = None
 
@@ -82,6 +81,10 @@ class ChatMemberService(ServiceInterface):
 
     def get_member(self, pk):
         return self._repository.get(pk)
+
+    def delete_member(self, pk):
+        chat_member = self._repository.delete(pk)
+        return chat_member
 
 
 user_service = UserService(repository=user_storage)

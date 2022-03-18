@@ -44,7 +44,7 @@ class ChatInteractor:
         messages = self.message.get_messages(limit=limit, offset=offset)
         messages_body = []
         for message in messages:
-            if message.chat_id == chat_id and message.user_id == user_id:
+            if message.chat_id == chat_id:
                 messages_body.append(message)
         return messages_body
 
@@ -76,6 +76,14 @@ class ChatInteractor:
         if not member:
             raise ValueError('Member not found')
         return member
+
+    def delete_member(self, user_id, chat_id):
+        members = self.get_members_by_chat(chat_id)
+        for member in members:
+            if member.user_id == user_id:
+                member.kicked = datetime.now()
+                return self.chat_member.delete_member(user_id)
+        return None
 
     @staticmethod
     def is_owner(owner: User, chat: Chat):
@@ -218,7 +226,7 @@ class CreateMessage:
 
 class OwnerMemberDeleteADD:
 
-    def on_post_add_member(self, req: Request, resp: Response):
+    def on_post(self, req: Request, resp: Response):
         owner = req.context.user
         data = req.get_media()
         cleaned_data = ChatMemberValidator(**data).dict()
@@ -233,8 +241,8 @@ class OwnerMemberDeleteADD:
         resp.body = member.dict()
         resp.status = falcon.HTTP_201
 
-    def on_delete_member(self, req: Request, resp: Response):
-        """TODO: owner"""
+    def on_delete(self, req: Request, resp: Response):
+        """TODO: deleted member"""
         owner = req.context.user
         data = req.get_media()
         cleaned_data = ChatMemberValidator(**data).dict()
@@ -244,7 +252,12 @@ class OwnerMemberDeleteADD:
             raise BadRequest()
         if not chat_app.is_owner(owner, chat):
             raise BadRequest()
+        user_id = cleaned_data['user_id']
+        chat_id = cleaned_data['chat_id']
 
-        member = ChatMember(**cleaned_data)
-        member.kicked = datetime.now()
-        resp.body = member.dict()
+        deleted_member = chat_app.delete_member(user_id=user_id, chat_id=chat_id)
+        if not deleted_member:
+            raise BadRequest()
+
+        resp.body = deleted_member.dict()
+        resp.status = falcon.HTTP_200
