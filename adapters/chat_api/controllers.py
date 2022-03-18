@@ -9,7 +9,7 @@ from application.services import (
     ChatMemberService, ChatService, MessageService,
     ChatsChange, MessageValidator, ChatMemberValidator
 )
-from composites.services import user_service, message_service, chat_service, chat_member_service
+from composites.chat_api import user_service, message_service, chat_service, chat_member_service
 
 
 class ChatInteractor:

@@ -1,6 +1,6 @@
 import pytest
 
-from application.services import user_service
+from composites.chat_api import user_service
 
 Base_URL = 'http://127.0.0.1:8080/'
 

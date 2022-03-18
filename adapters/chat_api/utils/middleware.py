@@ -6,7 +6,7 @@ import falcon
 from falcon import Request, Response
 
 from application.dto import Model
-from composites.services import user_service
+from composites.chat_api import user_service
 from core.auth_conf import jwt_skip_rules
 from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
 from core.utils import validate_data
