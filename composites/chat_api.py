@@ -1,4 +1,4 @@
-from adapters.storage import PythonStructRepository
+from adapters.storage.storage import PythonStructRepository
 from application.services import UserService, MessageService, ChatService, ChatMemberService, ChatInteractor
 
 user_storage = PythonStructRepository('users')
