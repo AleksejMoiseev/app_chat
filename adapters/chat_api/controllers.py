@@ -8,7 +8,7 @@ from application.errors import BadRequest
 from application.services import (
     ChatMemberService, ChatService, MessageService,
     chat_service, chat_member_service, message_service,
-    user_service, ChatsChange, MessageValidator
+    user_service, ChatsChange, MessageValidator, ChatMemberValidator
 )
 
 
@@ -36,8 +36,6 @@ class ChatInteractor:
                 member.kicked = datetime.now()
         return self.chat.delete_chat(chat_id)
 
-    def past_message(self, interval: datetime, chat_id: int):
-        pass
 
     def send_message(self, message: Message):
         return self.message.send_message(message)
@@ -61,9 +59,8 @@ class ChatInteractor:
     def get_user(self, pk):
         return self.user.get_user(pk)
 
-    def add_member_to_chat(self, user_id, chat_id):
-        chat_member = ChatMember(user_id=user_id, chat_id=chat_id)
-        return self.chat_member.create_members(chat_member)
+    def add_member_to_chat(self, member: ChatMember):
+        return self.chat_member.create_members(member)
 
     def get_chat(self, chat_id):
         return self.chat.get_chat(chat_id)
@@ -219,36 +216,35 @@ class CreateMessage:
         resp.status = falcon.HTTP_201
 
 
-class OwnerMemberCreate:
+class OwnerMemberDeleteADD:
 
     def on_post_add_member(self, req: Request, resp: Response):
         owner = req.context.user
         data = req.get_media()
-        chat_id = data['chat_id']
+        cleaned_data = ChatMemberValidator(**data).dict()
+        chat_id = cleaned_data['chat_id']
         chat = chat_app.get_chat(chat_id)
-        if chat.owner == owner.pk:
-            chat_member = chat_app.add_member_to_chat(**data)
-            resp.body = {'pk': chat_member.pk}
-            resp.status = falcon.HTTP_201
-        else:
-            resp.body = {'pk': None}
-            resp.status = falcon.HTTPBadRequest
+        if not chat:
+            raise BadRequest()
+        if not chat_app.is_owner(owner, chat):
+            raise BadRequest()
+        member = ChatMember(**cleaned_data)
+        member = chat_app.add_member_to_chat(member)
+        resp.body = member.dict()
+        resp.status = falcon.HTTP_201
 
-
-class OwnerMemberDelete:
-
-    def on_path_member(self, req: Request, resp: Response):
+    def on_delete_member(self, req: Request, resp: Response):
         """TODO: owner"""
         owner = req.context.user
         data = req.get_media()
-        member = ChatMember(**data)
-        for chat_member in chat_app.get_members():
-            condition = all(
-                chat_member.user_id == member.user_id
-                and chat_member.chat_id == member.chat_id
-                and not chat_member.kicked
-            )
-            if condition:
-                chat_member.kicked = datetime.now()
-                resp.body = f"member{chat_member.pk} delete success"
-                resp.status = falcon.HTTP_200
+        cleaned_data = ChatMemberValidator(**data).dict()
+        chat_id = cleaned_data['chat_id']
+        chat = chat_app.get_chat(chat_id)
+        if not chat:
+            raise BadRequest()
+        if not chat_app.is_owner(owner, chat):
+            raise BadRequest()
+
+        member = ChatMember(**cleaned_data)
+        member.kicked = datetime.now()
+        resp.body = member.dict()
