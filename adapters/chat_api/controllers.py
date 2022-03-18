@@ -57,6 +57,9 @@ class ChangeChats:
 
 
 class GetChatInfoMembers:
+    """
+    Get chat information
+    """
 
     def on_get(self, req: Request, resp: Response, chat_id):
         user = req.context.user
@@ -71,7 +74,9 @@ class GetChatInfoMembers:
 
 
 class GetAllMembers:
-
+    """
+    Get all chat members
+    """
     def on_get(self, req: Request, resp: Response, chat_id):
         user = req.context.user
         change_chat = ChatsChange(pk=chat_id)
@@ -86,6 +91,9 @@ class GetAllMembers:
 
 
 class ListMessages:
+    """
+    Get a list of chat messages
+    """
 
     def on_get(self, req: Request, resp: Response, chat_id):
         limit = req.get_param_as_int('limit')
@@ -110,6 +118,7 @@ class ListMessages:
 
 
 class CreateMessage:
+    """send message"""
     def on_post(self, req: Request, resp: Response):
         user = req.context.user
         params = req.get_media()
@@ -129,6 +138,7 @@ class CreateMessage:
 
 
 class OwnerMemberDeleteADD:
+    """Add, Delete member by chat"""
 
     def on_post(self, req: Request, resp: Response):
         owner = req.context.user
@@ -146,7 +156,6 @@ class OwnerMemberDeleteADD:
         resp.status = falcon.HTTP_201
 
     def on_delete(self, req: Request, resp: Response):
-        """TODO: deleted member and testing"""
         owner = req.context.user
         data = req.get_media()
         cleaned_data = ChatMemberValidator(**data).dict()
