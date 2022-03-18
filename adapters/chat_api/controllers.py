@@ -1,109 +1,13 @@
-from datetime import datetime
-
 import falcon
 from falcon import Request, Response
 
-from application.dto import User, Message, Chat, ChatMember
+from application.dto import Message, Chat, ChatMember
 from application.errors import BadRequest
 from application.services import (
-    ChatMemberService, ChatService, MessageService,
+
     ChatsChange, MessageValidator, ChatMemberValidator
 )
-from composites.chat_api import user_service, message_service, chat_service, chat_member_service
-
-
-class ChatInteractor:
-    def __init__(self, chat_member: ChatMemberService, chat: ChatService, message: MessageService,):
-        self.chat_member = chat_member
-        self.chat = chat
-        self.message = message
-        self.user = user_service
-
-    def create_chat(self, chat: Chat):
-        chat = self.chat.create_chat(chat)
-        params = {
-            "user_id": chat.owner,
-            "chat_id": chat.pk,
-        }
-        chat_member = ChatMember(**params)
-        self.chat_member.create_members(chat_member)
-        return chat
-
-    def delete_chat(self, chat_id):
-        members = self.chat_member.get_members()
-        for member in members:
-            if member.chat_id == chat_id:
-                member.kicked = datetime.now()
-        return self.chat.delete_chat(chat_id)
-
-
-    def send_message(self, message: Message):
-        return self.message.send_message(message)
-
-    def get_messages_by_chat_id(self, user_id, chat_id, limit, offset):
-        messages = self.message.get_messages(limit=limit, offset=offset)
-        messages_body = []
-        for message in messages:
-            if message.chat_id == chat_id:
-                messages_body.append(message)
-        return messages_body
-
-    def get_members_by_chat(self, chat_id):
-        members_all = self.chat_member.get_members()
-        members = []
-        for member in members_all:
-            if member.chat_id == chat_id and not member.kicked:
-                members.append(member)
-        return members
-
-    def get_user(self, pk):
-        return self.user.get_user(pk)
-
-    def add_member_to_chat(self, member: ChatMember):
-        return self.chat_member.create_members(member)
-
-    def get_chat(self, chat_id):
-        return self.chat.get_chat(chat_id)
-
-    def get_chats(self):
-        return self.chat.get_chats()
-
-    def get_members(self):
-        return self.chat_member.get_members()
-
-    def get_member(self, user_id):
-        member = self.chat_member.get_member(user_id)
-        if not member:
-            raise ValueError('Member not found')
-        return member
-
-    def delete_member(self, user_id, chat_id):
-        members = self.get_members_by_chat(chat_id)
-        for member in members:
-            if member.user_id == user_id:
-                member.kicked = datetime.now()
-                return self.chat_member.delete_member(user_id)
-        return None
-
-    @staticmethod
-    def is_owner(owner: User, chat: Chat):
-        if owner.pk == chat.owner:
-            return True
-        return False
-
-    def is_member(self, user_id, chat_id):
-        members_by_chat = self.get_members_by_chat(chat_id)
-        for member in members_by_chat:
-            if user_id == member.user_id:
-                return True
-        return False
-
-
-chat_app = ChatInteractor(
-    chat_member=chat_member_service,
-    chat=chat_service,
-    message=message_service,
-)
+from composites.chat_api import chat_app
 
 
 class Chats:
