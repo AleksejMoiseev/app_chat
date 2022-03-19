@@ -38,7 +38,7 @@ def duration_iso_string(duration):
     return '{}P{}DT{:02d}H{:02d}M{:02d}{}S'.format(sign, days, hours, minutes, seconds, ms)
 
 
-class DjangoJSONEncoder(json.JSONEncoder):
+class BaseJSONEncoder(json.JSONEncoder):
     """
     JSONEncoder subclass that knows how to encode date/time
     """
@@ -64,7 +64,7 @@ class DjangoJSONEncoder(json.JSONEncoder):
             return super().default(o)
 
 
-class ChatSerializer(DjangoJSONEncoder):
+class ChatSerializer(BaseJSONEncoder):
     def default(self, o):
         if isinstance(o, Model):
             return o.dict()

@@ -107,21 +107,21 @@ class ChatService:
 
 @component
 class ChatMemberService:
-    _repository: ChatMembersRepositoryInterface
+    chat_member_repo: ChatMembersRepositoryInterface
 
     def get_members(self, limit=None, offset=None, **params):
-        members = self._repository.get_list(limit=limit, offset=offset, **params)
+        members = self.chat_member_repo.get_list(limit=limit, offset=offset, **params)
         return members
 
     def create_members(self, chat_member: ChatMember):
-        chat_member = self._repository.add(chat_member)
+        chat_member = self.chat_member_repo.add(chat_member)
         return chat_member
 
     def _get_member(self, pk):
-        return self._repository.get(pk)
+        return self.chat_member_repo.get(pk)
 
     def _delete_member(self, pk):
-        chat_member = self._repository.delete(pk)
+        chat_member = self.chat_member_repo.delete(pk)
         return chat_member
 
     def get_members_by_chat(self, chat_id):
@@ -143,7 +143,7 @@ class ChatMemberService:
         for member in members:
             if member.user_id == user_id:
                 member.kicked = datetime.now()
-                return self._repository.delete(user_id)
+                return self.chat_member_repo.delete(user_id)
         return None
 
     @staticmethod
@@ -161,42 +161,6 @@ class ChatMemberService:
 
     def add_member_to_chat(self, member: ChatMember):
         return self.create_members(member)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # from datetime import datetime
