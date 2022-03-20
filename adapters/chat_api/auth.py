@@ -35,6 +35,8 @@ class RegisterUser:
 class AuthView:
 
     def on_post(self, req, resp):
+        """TODO: It is necessary to write a competent encoding of the payload tied for a while
+         """
         data = req.get_media()
         email = data.get('email')
         password = data.get('password')
@@ -64,6 +66,12 @@ class AuthView:
             resp.status = falcon.HTTP_200
 
     def on_put(self, req, resp):
+        """
+        TODO implemented token decay by time need to add payload
+        :param req:
+        :param resp:
+        :return:
+        """
         data = req.get_header("Authorization").split(' ')
         token_auth = validate_data(data)
         token = token_auth["value"]
