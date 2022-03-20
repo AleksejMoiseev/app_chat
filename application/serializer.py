@@ -54,4 +54,3 @@ class UserSerializer(ModelSerializer):
     @validator('password')
     def clean_password(cls, value: str):
         return cls.__encode_password(value)
-

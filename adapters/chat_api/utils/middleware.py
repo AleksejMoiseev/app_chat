@@ -104,8 +104,3 @@ class JWTUserAuthMiddleware:
         if not user:
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
         req.context.user = user_service.get_user(payload['pk'])
-
-
-
-
-

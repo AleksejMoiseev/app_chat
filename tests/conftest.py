@@ -168,8 +168,6 @@ def chat_repo(chat0, chats):
     return chat_repo
 
 
-
-
 @pytest.fixture
 def chat_member_params():
     return {
@@ -216,4 +214,3 @@ def chat_member_service(chat_member_repo):
 @pytest.fixture(scope='function')
 def chat_service(chat_repo, chat_member_repo):
     return ChatService(chats_repo=chat_repo, members_repo=chat_member_repo)
-
