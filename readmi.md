@@ -6,7 +6,7 @@ gunicorn -c settings.py example:api  --reload
 
 
 1. POST: http://127.0.0.1:8080/register
-В качестве ответа приходит access и refresh tokens
+В качестве ответа приходит access token
 ![img.png](img/register.png)
 
 
@@ -38,6 +38,19 @@ PUT, PATCH, DELETE: http://127.0.0.1:8080/chats/{chat_id}
 
 ![img.png](img/add_member.png)
 
+6. DELETE http://127.0.0.1:8080/members
+
+Выгнать пользователя из чата
+
+![img.png](img/del_member.png)
+
+
+пользователь не имеет более доступа к ресурсам чата
+
+
+![img.png](img/result.png)
+
+
 
 7. http://127.0.0.1:8080/members/0
 Получить всех участников чата, может владелец чата и участник
@@ -57,6 +70,3 @@ GET: http://127.0.0.1:8080/messages/0
 и участник чата - реализовано
 
 ![img.png](img/get_messages.png)
-
-
-
