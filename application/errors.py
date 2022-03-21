@@ -1,6 +1,10 @@
 import falcon
 
 
+def handle(req, resp, ex, params):
+    raise falcon.HTTPError(falcon.falcon.HTTP_792)
+
+
 class BadRequest(Exception):
     @staticmethod
     def handle(req, resp, exc, params):

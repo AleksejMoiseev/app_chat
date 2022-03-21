@@ -1,12 +1,13 @@
 import datetime
 import json
 import re
+from classic.components.component import component
 
 import falcon
 from falcon import Request, Response
 
 from application.dto import Model
-from composites.chat_api import user_service
+from application.services import UserService
 from core.auth_conf import jwt_skip_rules
 from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
 from core.utils import validate_data
@@ -88,7 +89,9 @@ def check_excluded_rules(method, path, config):
     return True
 
 
+@component
 class JWTUserAuthMiddleware:
+    user_service: UserService
 
     def process_resource(self, req: Request, resp: Response, resource, params):
 
@@ -100,7 +103,7 @@ class JWTUserAuthMiddleware:
         if not is_valid_access_token(token):
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
         payload = get_decode_jwt_by_payload(token) or None
-        user = user_service.get_user(payload['pk'])
+        user = self.user_service.get_user(payload['pk'])
         if not user:
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
-        req.context.user = user_service.get_user(payload['pk'])
+        req.context.user = self.user_service.get_user(payload['pk'])

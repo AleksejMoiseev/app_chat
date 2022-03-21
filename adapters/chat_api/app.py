@@ -1,8 +1,11 @@
 from classic.http_api import App
+from pydantic import ValidationError
+
 from adapters.chat_api import controllers
 from adapters.chat_api import auth
 from adapters.chat_api.utils.middleware import JSONTranslator, JWTUserAuthMiddleware
 from application import services
+from application.errors import handle, BadRequest
 
 
 def create_app(
@@ -13,7 +16,7 @@ def create_app(
 ) -> App:
     middleware = [
         JSONTranslator(),
-        JWTUserAuthMiddleware(),
+        JWTUserAuthMiddleware(user_service=user_service),
 
     ]
 
@@ -40,4 +43,6 @@ def create_app(
     app.register(auth.RegisterUser(
         user_service=user_service,
     ))
+    app.add_error_handler(ValidationError, handle)
+    app.add_error_handler(BadRequest)
     return app

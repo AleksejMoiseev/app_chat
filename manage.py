@@ -7,7 +7,7 @@ from application.errors import BadRequest
 monkey.patch_all()
 import falcon
 from adapters.chat_api.utils.middleware import JSONTranslator
-from adapters.chat_api.auth import RegisterUser, AuthView
+from adapters.chat_api.auth import RegisterUser
 from pydantic import ValidationError
 from adapters.chat_api.utils.middleware import JWTUserAuthMiddleware
 
@@ -33,7 +33,7 @@ api.add_error_handler(BadRequest)
 
 """URLS"""
 api.add_route("/register", RegisterUser())
-api.add_route("/login", AuthView())
+# api.add_route("/login", AuthView())
 
 # api.add_route("/chats", Chats())
 # api.add_route("/chats/{chat_id}", ChangeChats())

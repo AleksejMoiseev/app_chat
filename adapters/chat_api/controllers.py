@@ -15,7 +15,7 @@ from application.services import (
 class Chats:
     chat_service: ChatService
 
-    def on_post_chats(self, req: Request, resp: Response):
+    def on_post_create(self, req: Request, resp: Response):
         user = req.context.user
         data = req.get_media()
         chat = Chat(owner=user.pk, **data)
@@ -29,9 +29,9 @@ class ChangeChats:
     chat_service: ChatService
     chat_member_service: ChatMemberService
 
-    def on_put(self, req: Request, resp: Response, chat_id):
+    def on_put_update(self, req: Request, resp: Response):
         params = req.get_media()
-        change_chat = ChatsChange(pk=chat_id, **params)
+        change_chat = ChatsChange(**params)
         chat = self.chat_service.get_chat(change_chat.pk)
         if not chat:
             raise BadRequest()
@@ -46,13 +46,13 @@ class ChangeChats:
         resp.body = chat.dict()
         resp.status = falcon.HTTP_200
 
-    def on_patch(self, req: Request, resp: Response, chat_id):
-        return self.on_put(req, resp, chat_id)
-
-    def on_delete(self, req: Request, resp: Response, chat_id):
+    def on_put_delete_chat(self, req: Request, resp: Response):
         owner = req.context.user
-        change_chat = ChatsChange(pk=chat_id)
+        params = req.get_media()
+        change_chat = ChatsChange(**params)
         chat = self.chat_service.get_chat(change_chat.pk)
+        if not chat:
+            raise BadRequest()
         if not self.chat_member_service.is_owner(owner, chat):
             raise BadRequest()
         deleted_chat = self.chat_service.delete_chat(chat.pk)
