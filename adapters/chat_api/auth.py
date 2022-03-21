@@ -1,14 +1,18 @@
 import falcon
+from classic.components.component import component
 from falcon import Request, Response
 
 from application.dto import User
 from application.serializer import UserSerializer
+from application.services import UserService
 from composites.chat_api import user_service
 from core.jwt import get_jwt_token, is_valid_refresh_token, get_jwt_by_payload
 from core.utils import validate_data
 
 
+@component
 class RegisterUser:
+    user_service: UserService
 
     def on_post(self, req: Request, resp: Response):
         data = req.get_media()

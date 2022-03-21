@@ -1,7 +1,7 @@
 from gevent import monkey, pywsgi
 
-from adapters.chat_api.controllers import Chats, ChangeChats, GetAllMembers, ListMessages, \
-    CreateMessage, GetChatInfoMembers, OwnerMemberDeleteADD
+# from adapters.chat_api.controllers import Chats, ChangeChats, GetAllMembers, ListMessages, \
+#     CreateMessage, GetChatInfoMembers, OwnerMemberDeleteADD
 from application.errors import BadRequest
 
 monkey.patch_all()
@@ -35,13 +35,13 @@ api.add_error_handler(BadRequest)
 api.add_route("/register", RegisterUser())
 api.add_route("/login", AuthView())
 
-api.add_route("/chats", Chats())
-api.add_route("/chats/{chat_id}", ChangeChats())
-api.add_route("/info/{chat_id}", GetChatInfoMembers())
-api.add_route("/members/{chat_id}", GetAllMembers())
-api.add_route("/messages/{chat_id}", ListMessages())
-api.add_route("/messages", CreateMessage())
-api.add_route("/members", OwnerMemberDeleteADD())
+# api.add_route("/chats", Chats())
+# api.add_route("/chats/{chat_id}", ChangeChats())
+# api.add_route("/info/{chat_id}", GetChatInfoMembers())
+# api.add_route("/members/{chat_id}", GetAllMembers())
+# api.add_route("/messages/{chat_id}", ListMessages())
+# api.add_route("/messages", CreateMessage())
+# api.add_route("/members", OwnerMemberDeleteADD())
 
 
 if __name__ == '__main__':

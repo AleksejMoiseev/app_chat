@@ -3,6 +3,8 @@ from adapters.storage.storage import (
     ChatMemberPythonStructRepository, ChatPythonStructRepository,
 )
 from application.services import UserService, MessageService, ChatService, ChatMemberService
+from adapters.chat_api import app
+
 
 user_storage = UserPythonStructRepository('users')
 message_storage = MessagePythonStructRepository('message')
