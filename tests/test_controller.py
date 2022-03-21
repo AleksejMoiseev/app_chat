@@ -96,3 +96,6 @@ class TestChatMemberService:
 
     def test_add_member_to_chat(self, chat_member_service, chat_member, chat_member0):
         assert chat_member_service.add_member_to_chat(chat_member) == chat_member0
+
+    def test_del(self, chat_member_service, user1, chat0, chat_member0):
+        assert chat_member_service.delete_member(user1.pk, chat0.pk) == chat_member0

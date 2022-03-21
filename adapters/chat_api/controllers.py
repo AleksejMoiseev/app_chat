@@ -1,5 +1,6 @@
 import falcon
 from falcon import Request, Response
+from classic.components.component import component
 
 from application.dto import Message, Chat, ChatMember
 from application.errors import BadRequest
