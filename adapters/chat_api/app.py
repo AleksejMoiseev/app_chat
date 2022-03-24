@@ -23,21 +23,10 @@ def create_app(
     app = App(middleware=middleware, prefix='/api')
     app.register(controllers.Chats(chat_service=chat_service))
     app.register(controllers.ChangeChats(chat_service=chat_service, chat_member_service=chat_member_service))
-    app.register(controllers.Info(chat_service=chat_service, chat_member_service=chat_member_service))
-    app.register(controllers.GetAllMembers(chat_service=chat_service, chat_member_service=chat_member_service))
     app.register(controllers.ListMessages(
         chat_service=chat_service,
         chat_member_service=chat_member_service,
         message_service=message_service
-    ))
-    app.register(controllers.CreateMessage(
-        chat_service=chat_service,
-        chat_member_service=chat_member_service,
-        message_service=message_service
-    ))
-    app.register(controllers.OwnerMemberDeleteADD(
-        chat_service=chat_service,
-        chat_member_service=chat_member_service,
     ))
     app.register(auth.RegisterUser(
         user_service=user_service,

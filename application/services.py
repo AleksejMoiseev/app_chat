@@ -1,9 +1,9 @@
 from datetime import datetime
+
 from classic.app.dto import DTO
 from classic.components.component import component
 
 from application.dto import User, Message, Chat, ChatMember
-from .errors import BadRequest
 from .interfaces import (
     UserRepositoryInterface, MessageRepositoryInterface, ChatMembersRepositoryInterface,
     ChatRepositoryInterface,
