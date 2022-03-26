@@ -1,13 +1,24 @@
 from gevent import monkey, pywsgi
-
+from sqlalchemy import create_engine
 from adapters.chat_api import app
+from adapters import database
 from adapters.storage.storage import (
     UserPythonStructRepository, MessagePythonStructRepository,
     ChatMemberPythonStructRepository, ChatPythonStructRepository,
 )
+from classic.aspects import points
 from application.services import UserService, MessageService, ChatService, ChatMemberService
-
+from classic.sql_storage import TransactionContext
 monkey.patch_all()
+
+
+settings = database.DBSettings()
+
+engine = create_engine(settings.DB_URL)
+
+database.metadata.create_all(engine)
+
+transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 
 user_storage = UserPythonStructRepository('users')
 message_storage = MessagePythonStructRepository('message')
@@ -20,6 +31,8 @@ message_service = MessageService(messages_repo=message_storage)
 chat_service = ChatService(chats_repo=chat_storage, members_repo=chat_member_storage)
 chat_member_service = ChatMemberService(chat_member_repo=chat_member_storage)
 
+
+points.join(transaction_ctx)
 
 app = app.create_app(
     chat_service=chat_service,
