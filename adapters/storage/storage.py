@@ -5,6 +5,9 @@ from application.interfaces import (
     MessageRepositoryInterface, ChatRepositoryInterface
 )
 
+from classic.sql_storage.repository import BaseRepository
+from classic.components.component import component
+
 _registry = defaultdict(dict)
 
 
@@ -35,7 +38,8 @@ class PythonStructRepository(RepositoryInterface):
         return entity
 
 
-class UserPythonStructRepository(UserRepositoryInterface, PythonStructRepository):
+@component
+class UserPythonStructRepository(UserRepositoryInterface, BaseRepository):
     pass
 
 
