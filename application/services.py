@@ -76,7 +76,7 @@ class ChatService:
         chat = self.chats_repo.add(chat)
         return chat
 
-    def create_chat(self, chat: Chat):
+    def _create_chat(self, chat: Chat):
         chat = self.register_chat(chat)
         params = {
             "user_id": chat.owner,
@@ -85,6 +85,10 @@ class ChatService:
         chat_member = ChatMember(**params)
         self.members_repo.add(chat_member)
         return chat
+
+    def create_chat(self, user_id, data):
+        chat = Chat(owner=user_id, **data)
+        return self._create_chat(chat)
 
     def _delete_chat(self, pk):
         return self.chats_repo.delete(pk)
