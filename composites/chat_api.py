@@ -6,6 +6,9 @@ from adapters.storage.storage import (
     UserPythonStructRepository, MessagePythonStructRepository,
     ChatMemberPythonStructRepository, ChatPythonStructRepository,
 )
+from adapters.database.settings import CONF
+from adapters.database.sqlstorage import UserRepository
+from application.dataclases import User
 from classic.aspects import points
 from application.services import UserService, MessageService, ChatService, ChatMemberService
 from classic.sql_storage import TransactionContext
@@ -17,13 +20,16 @@ database.metadata.create_all(engine)
 
 transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 
-user_storage = UserPythonStructRepository('users')
+#user_storage = UserPythonStructRepository('users')
+user_storage = UserRepository(model=User, default_limit=CONF.default_limit.value, context=transaction_ctx)
 message_storage = MessagePythonStructRepository('message')
 chat_storage = ChatPythonStructRepository('chat')
 chat_member_storage = ChatMemberPythonStructRepository("chat_member")
 
 
+#user_service = UserService(repository=user_storage)
 user_service = UserService(repository=user_storage)
+
 message_service = MessageService(messages_repo=message_storage)
 chat_service = ChatService(chats_repo=chat_storage, members_repo=chat_member_storage)
 chat_member_service = ChatMemberService(chat_member_repo=chat_member_storage)

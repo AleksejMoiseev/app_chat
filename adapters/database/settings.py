@@ -3,10 +3,15 @@ from pathlib import Path
 
 from pydantic import BaseSettings
 from dotenv import dotenv_values
+import enum
 
 
 BASE_DIR = Path(__file__).resolve().parent
 CONF_DIR = os.path.join(BASE_DIR, '.env')
+
+
+class CONF(enum.Enum):
+    default_limit = 5
 
 
 config = dotenv_values(CONF_DIR)

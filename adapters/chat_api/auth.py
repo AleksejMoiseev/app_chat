@@ -1,18 +1,19 @@
 import falcon
 from classic.components.component import component
 from falcon import Request, Response
+from classic.aspects import points
 
-from application.dto import User
+from application.dataclases import User
 from application.serializer import UserSerializer
 from application.services import UserService
-from core.jwt import get_jwt_token, is_valid_refresh_token, get_jwt_by_payload
-from core.utils import validate_data
+from core.jwt import get_jwt_token, get_jwt_by_payload
 
 
 @component
 class RegisterUser:
     user_service: UserService
 
+    @points.join_point
     def on_post_register(self, req: Request, resp: Response):
         data = req.get_media()
         email = data.get('email')
@@ -25,10 +26,10 @@ class RegisterUser:
         user = User(**cleaned_data)
         user = self.user_service.register(user)
         user.refresh_token, _ = get_jwt_token()
-        user.access_token = get_jwt_by_payload({'pk': user.pk})
+        user.access_token = get_jwt_by_payload({'id': user.id})
         resp.status = falcon.HTTP_200
         resp.body = {
-            'pk': user.pk,
+            'pk': user.id,
             'username': user.username,
             'refresh_token': user.refresh_token,
             'access_token': user.access_token
@@ -59,7 +60,7 @@ class RegisterUser:
             resp.status = falcon.HTTP_404
         else:
             user.refresh_token, _ = get_jwt_token()
-            user.access_token = get_jwt_by_payload({'pk': user.pk})
+            user.access_token = get_jwt_by_payload({'id': user.id})
             resp.body = {
                 "refresh_token": user.refresh_token,
                 "access_token": user.access_token,
@@ -72,6 +73,7 @@ class Auth:
     user_service: UserService
 
     def on_post_login(self, req, resp):
+        data = req.get_media()
         serializer_data = UserSerializer(**data)
         users = self.user_service.get_users()
         user = None
