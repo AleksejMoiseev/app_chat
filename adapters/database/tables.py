@@ -1,10 +1,9 @@
+from datetime import datetime
+
 from sqlalchemy import (
-    MetaData, Table, Column, Integer, String, Float, ForeignKey, Date, Text
+    MetaData, Table, Column, Integer, String, ForeignKey, Text, DateTime
 )
-from sqlalchemy.orm import registry, relationship
 
-
-mapper_registry = registry()
 metadata = MetaData()
 
 users = Table(
@@ -22,13 +21,24 @@ chats = Table(
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('owner',  ForeignKey('users.id')),
     Column('descriptions', Text),
-    Column('created', Integer, Date),
+    Column('created', DateTime, nullable=False, default=datetime.now),
 )
 
 messages = Table(
     'messages', metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user_id',  ForeignKey('users.id')),
-    Column('chat_id', ForeignKey('users.id')),
-    Column('created', Integer, Date),
+    Column('chat_id', ForeignKey('chats.id')),
+    Column('body', Text),
+    Column('created', DateTime, nullable=False, default=datetime.now),
+)
+
+chatmembers = Table(
+    'chatmembers', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id',  ForeignKey('users.id')),
+    Column('chat_id', ForeignKey('chats.id')),
+    Column('checked_in', DateTime, nullable=False, default=datetime.now),
+    Column('checked_out', DateTime),
+    Column('kicked', DateTime),
 )

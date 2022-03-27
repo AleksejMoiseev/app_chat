@@ -8,8 +8,11 @@ DB_URL = f"mysql://{config.get('DB_USER')}:{config.get('DB_PASSWORD')}@{config.g
 
 
 class DBSettings(BaseSettings):
-    DB_URL: str = DB_URL
+    DB_URL: str = 'mysql://exchange:exchange@localhost:3306/bootcamp'
 
+
+settings = DBSettings()
 
 if __name__ == '__main__':
-    print(DB_URL)
+    settings = DBSettings()
+    print(settings.DB_URL)

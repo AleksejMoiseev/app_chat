@@ -11,10 +11,7 @@ from application.services import UserService, MessageService, ChatService, ChatM
 from classic.sql_storage import TransactionContext
 monkey.patch_all()
 
-
-settings = database.DBSettings()
-
-engine = create_engine(settings.DB_URL)
+engine = create_engine(database.settings.DB_URL, echo=True)
 
 database.metadata.create_all(engine)
 

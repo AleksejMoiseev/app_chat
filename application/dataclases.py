@@ -20,7 +20,7 @@ class User(BaseModel):
 
 @dataclass
 class Chat(BaseModel):
-    owner: User
+    user: User
     descriptions: Text = None
     title: str = None
     created: datetime = field(default_factory=datetime.now)
