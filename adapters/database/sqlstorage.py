@@ -4,6 +4,7 @@ from sqlalchemy import select, desc, text, func
 
 from application.interfaces import UserRepositoryInterface
 
+
 @component
 class UserPythonStructRepository(UserRepositoryInterface, BaseRepository):
     pass
