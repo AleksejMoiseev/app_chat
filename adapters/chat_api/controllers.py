@@ -1,8 +1,9 @@
 import falcon
 from classic.components.component import component
 from falcon import Request, Response
+from classic.aspects import points
 
-from application.dto import Message, ChatMember
+from application.dataclases import Message, ChatMember
 from application.errors import BadRequest
 from application.services import ChatService
 from application.services import (
@@ -15,11 +16,12 @@ from application.services import (
 class Chats:
     chat_service: ChatService
 
+    @points.join_point
     def on_post_create(self, req: Request, resp: Response):
         user = req.context.user
         data = req.get_media()
-        chat = self.chat_service.create_chat(user.pk, data)
-        resp.body = chat.dict()
+        chat = self.chat_service.create_chat(user, data)
+        resp.body = chat
         resp.status = falcon.HTTP_201
 
 
@@ -28,46 +30,39 @@ class ChangeChats:
     chat_service: ChatService
     chat_member_service: ChatMemberService
 
+    @points.join_point
     def on_put_update(self, req: Request, resp: Response):
         params = req.get_media()
         change_chat = ChatsChange(**params)
-        chat = self.chat_service.get_chat(change_chat.pk)
-        if not chat:
-            raise BadRequest()
         owner = req.context.user
-        if not self.chat_member_service.is_owner(owner, chat):
-            raise BadRequest()
-        cleaned_data = change_chat.dict()
-        for field, value in cleaned_data.items():
-            if value is None:
-                continue
-            setattr(chat, field, value)
-        resp.body = chat.dict()
+        chat_id = change_chat.id
+        chat = self.chat_service.get_chat_by_owner(owner, chat_id)
+        print(self.chat_member_service.is_member(user=owner, chat=chat))
+        cleaned_data = {key: value for key, value in change_chat.dict().items() if value is not None and key != 'id'}
+        self.chat_service.update_chat(chat_id, cleaned_data)
+        resp.body = chat
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_put_delete_chat(self, req: Request, resp: Response):
         owner = req.context.user
         params = req.get_media()
         change_chat = ChatsChange(**params)
-        chat = self.chat_service.get_chat(change_chat.pk)
-        if not chat:
+        chat_id = change_chat.id
+        chat = self.chat_service.get_chat_by_owner(owner, chat_id)
+        deleted_chat = self.chat_service.delete_chat(chat_id)
+        if not deleted_chat:
             raise BadRequest()
-        if not self.chat_member_service.is_owner(owner, chat):
-            raise BadRequest()
-        deleted_chat = self.chat_service.delete_chat(chat.pk)
-        resp.body = deleted_chat.dict()
+        resp.body = chat
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_post_add_member(self, req: Request, resp: Response):
         owner = req.context.user
         data = req.get_media()
         cleaned_data = ChatMemberValidator(**data).dict()
         chat_id = cleaned_data['chat_id']
-        chat = self.chat_service.get_chat(chat_id)
-        if not chat:
-            raise BadRequest()
-        if not self.chat_member_service.is_owner(owner, chat):
-            raise BadRequest()
+        chat = self.chat_service.get_chat_by_owner(owner, chat_id)
         member = ChatMember(**cleaned_data)
         members_by_chat = self.chat_member_service.get_members_by_chat(chat_id)
         for m in members_by_chat:
@@ -80,6 +75,7 @@ class ChangeChats:
             resp.body = member.dict()
             resp.status = falcon.HTTP_201
 
+    @points.join_point
     def on_delete_delete_member(self, req: Request, resp: Response):
         owner = req.context.user
         data = req.get_media()
@@ -103,38 +99,39 @@ class ChangeChats:
     def on_get_info(self, req: Request, resp: Response):
         chat_id = req.get_param_as_int('chat_id')
         user = req.context.user
-        change_chat = ChatsChange(pk=chat_id)
-        chat = self.chat_service.get_chat(change_chat.pk)
-        if not chat:
-            raise BadRequest()
-        if not self.chat_member_service.is_member(user.pk, chat.pk):
-            raise BadRequest()
-        resp.body = chat.dict()
-        resp.status = falcon.HTTP_200
+        change_chat = ChatsChange(id=chat_id)
+        chat_id = change_chat.id
+        chat = self.chat_service.get_chat(chat_id)
+        is_member = self.chat_member_service.is_member(user=user, chat=chat)
+
+        if is_member:
+            resp.body = chat
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_400
 
     def on_get_members(self, req: Request, resp: Response):
         chat_id = req.get_param_as_int('chat_id')
         user = req.context.user
-        change_chat = ChatsChange(pk=chat_id)
-        chat = self.chat_service.get_chat(change_chat.pk)
-        if not self.chat_member_service.is_member(user.pk, chat.pk):
+        change_chat = ChatsChange(id=chat_id)
+        chat = self.chat_service.get_chat(change_chat.id)
+        is_member = self.chat_member_service.is_member(user=user, chat=chat)
+        if not is_member:
             raise BadRequest()
-        members = self.chat_member_service.get_members_by_chat(chat.pk)
-        resp.body = {
-            'members': members,
-        }
+        members = self.chat_member_service.get_members_by_chat(chat)
+        resp.body = members
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_post_leave(self, req: Request, resp: Response):
         user = req.context.user
         params = req.get_media()
         change_chat = ChatsChange(**params)
-        chat_id = change_chat.pk
+        chat_id = change_chat.id
         chat = self.chat_service.get_chat(chat_id)
         if not chat:
             raise BadRequest()
-        if not self.chat_member_service.is_member(user_id=user.pk, chat_id=chat_id):
-            raise BadRequest()
+        is_member = self.chat_member_service.is_member(user=user, chat=chat)
         member_by_user = self.chat_member_service.get_member(user.pk)
         pass
 
@@ -167,6 +164,7 @@ class ListMessages:
         }
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_post_create(self, req: Request, resp: Response):
         user = req.context.user
         params = req.get_media()

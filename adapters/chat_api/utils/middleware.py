@@ -2,11 +2,13 @@ import datetime
 import json
 import re
 from classic.components.component import component
+from sqlalchemy.orm.state import InstanceState
 
 import falcon
 from falcon import Request, Response
 
 from application.dto import Model
+from application.dataclases import BaseModel
 from application.services import UserService
 from core.auth_conf import jwt_skip_rules
 from core.jwt import is_valid_access_token, get_decode_jwt_by_payload
@@ -69,6 +71,13 @@ class ChatSerializer(BaseJSONEncoder):
     def default(self, o):
         if isinstance(o, Model):
             return o.dict()
+        if isinstance(o, BaseModel):
+            forbidden_keys = ['_sa_instance_state', 'user']
+            result = {}
+            for key, value in o.__dict__.items():
+                if key not in forbidden_keys:
+                    result[key] = value
+            return result
         return super().default(o)
 
 
@@ -94,16 +103,16 @@ class JWTUserAuthMiddleware:
     user_service: UserService
 
     def process_resource(self, req: Request, resp: Response, resource, params):
-
         if check_excluded_rules(method=req.method, path=req.path, config=jwt_skip_rules):
             return
+
         data = req.get_header("Authorization", required=True).split(' ')
         token_auth = validate_data(data)
         token = token_auth["value"]
         if not is_valid_access_token(token):
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
         payload = get_decode_jwt_by_payload(token) or None
-        user = self.user_service.get_user(payload['pk'])
+        user = self.user_service.get_user(payload['id'])
         if not user:
             raise falcon.HTTPUnauthorized(description='Invalid headers token')
-        req.context.user = self.user_service.get_user(payload['pk'])
+        req.context.user = user

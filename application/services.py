@@ -2,16 +2,18 @@ from datetime import datetime
 
 from classic.app.dto import DTO
 from classic.components.component import component
+from sqlalchemy.exc import InvalidRequestError
 
-from application.dto import User, Message, Chat, ChatMember
-from .interfaces import (
+from application.dataclases import Chat, User, ChatMember, Message
+from application.errors import BadRequest
+from application.interfaces import (
     UserRepositoryInterface, MessageRepositoryInterface, ChatMembersRepositoryInterface,
     ChatRepositoryInterface,
 )
 
 
 class ChatsChange(DTO):
-    pk: int
+    id: int
     title: str = None
     descriptions: str = None
 
@@ -45,6 +47,13 @@ class UserService:
         users = self._repository.get_list(limit=limit, offset=offset, **params)
         return users
 
+    def filer_by(self, params):
+        try:
+            entity_model = self._repository.filer_by(params)
+        except (InvalidRequestError, ):
+            raise BadRequest()
+        return entity_model
+
 
 @component
 class MessageService:
@@ -76,18 +85,21 @@ class ChatService:
         chat = self.chats_repo.add(chat)
         return chat
 
+    def update_chat(self, chat_id, params):
+        return self.chats_repo.update(chat_id, params)
+
     def _create_chat(self, chat: Chat):
         chat = self.register_chat(chat)
         params = {
-            "user_id": chat.owner,
-            "chat_id": chat.pk,
+            "user": chat.user,
+            "chat": chat,
         }
         chat_member = ChatMember(**params)
         self.members_repo.add(chat_member)
         return chat
 
     def create_chat(self, user_id, data):
-        chat = Chat(owner=user_id, **data)
+        chat = Chat(user=user_id, **data)
         return self._create_chat(chat)
 
     def _delete_chat(self, pk):
@@ -102,6 +114,14 @@ class ChatService:
 
     def get_chat(self, pk):
         chat = self.chats_repo.get(pk)
+        return chat
+
+    def get_chat_by_owner(self, owner, chat_id):
+        chat = self.get_chat(chat_id)
+        if not chat:
+            raise BadRequest()
+        if owner != chat.user:
+            raise BadRequest()
         return chat
 
     def get_chats(self, limit=None, offset=None, **params):
@@ -128,13 +148,8 @@ class ChatMemberService:
         chat_member = self.chat_member_repo.delete(pk)
         return chat_member
 
-    def get_members_by_chat(self, chat_id):
-        members_all = self.get_members()
-        members = []
-        for member in members_all:
-            if member.chat_id == chat_id and not member.kicked:
-                members.append(member)
-        return members
+    def get_members_by_chat(self, chat):
+        return self.chat_member_repo.get_members_by_chat(chat)
 
     def get_member(self, user_id):
         member = self._get_member(user_id)
@@ -152,16 +167,28 @@ class ChatMemberService:
 
     @staticmethod
     def is_owner(owner, chat):
-        if owner.pk == chat.owner:
+        if owner.id == chat.user:
             return True
         return False
 
-    def is_member(self, user_id, chat_id):
-        members_by_chat = self.get_members_by_chat(chat_id)
-        for member in members_by_chat:
-            if user_id == member.user_id:
-                return True
-        return False
+    def is_member(self, user, chat):
+        params = {
+            'user': user,
+            'chat': chat,
+        }
+        chat_member = self.chat_member_repo.filer_by(params)
+        if chat_member.kicked:
+            return False
+        return True
 
     def add_member_to_chat(self, member: ChatMember):
         return self.create_members(member)
+
+
+if __name__ == '__main__':
+   c = ChatsChange(id=1, title='sss')
+   print(c.dict())
+   from application.dataclases import Chat
+   cl = c.dict()
+   ch = Chat(**cl)
+   print(ch)

@@ -31,9 +31,6 @@ def create_app(
     app.register(auth.RegisterUser(
         user_service=user_service,
     ))
-    app.register(auth.Auth(
-        user_service=user_service,
-    ))
     app.add_error_handler(ValidationError, handle)
     app.add_error_handler(BadRequest)
     return app

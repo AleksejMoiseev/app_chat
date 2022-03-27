@@ -33,6 +33,15 @@ class SQLBaseRepository(RepositoryInterface, BaseRepository):
         self.session.flush()
         return result
 
+    def filer_by(self, params):
+        entity_model = self.session.query(self.model).filter_by(**params).one_or_none()
+        return entity_model
+
+    def update(self, reference, params):
+        result = self.session.query(self.model).filter_by(id=reference).update(params, synchronize_session='fetch')
+        self.session.flush()
+        return result
+
 
 @component
 class UserRepository(SQLBaseRepository):
@@ -50,6 +59,10 @@ class ChatRepository(SQLBaseRepository):
 class ChatMemberRepository(SQLBaseRepository):
     model: ChatMember
     default_limit: int
+
+    def get_members_by_chat(self, chat):
+        result = self.session.query(self.model).filter(chat==chat).all()
+        return result
 
 
 @component

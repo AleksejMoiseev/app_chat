@@ -29,7 +29,10 @@ class ChatRepositoryInterface(abc.ABC, RepositoryInterface):
 
 
 class ChatMembersRepositoryInterface(abc.ABC, RepositoryInterface):
-    pass
+
+    @abc.abstractmethod
+    def get_members_by_chat(self, chat):
+        pass
 
 
 class MessageRepositoryInterface(abc.ABC, RepositoryInterface):

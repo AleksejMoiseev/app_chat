@@ -7,8 +7,10 @@ from adapters.storage.storage import (
     ChatMemberPythonStructRepository, ChatPythonStructRepository,
 )
 from adapters.database.settings import CONF
-from adapters.database.sqlstorage import UserRepository
-from application.dataclases import User
+from adapters.database.sqlstorage import (
+    UserRepository, MessageRepository, ChatRepository, ChatMemberRepository
+)
+from application.dataclases import User, Message, Chat, ChatMember
 from classic.aspects import points
 from application.services import UserService, MessageService, ChatService, ChatMemberService
 from classic.sql_storage import TransactionContext
@@ -20,11 +22,18 @@ database.metadata.create_all(engine)
 
 transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 
-#user_storage = UserPythonStructRepository('users')
+
 user_storage = UserRepository(model=User, default_limit=CONF.default_limit.value, context=transaction_ctx)
-message_storage = MessagePythonStructRepository('message')
-chat_storage = ChatPythonStructRepository('chat')
-chat_member_storage = ChatMemberPythonStructRepository("chat_member")
+message_storage = MessageRepository(model=Message, default_limit=CONF.default_limit.value, context=transaction_ctx)
+chat_storage = ChatRepository(model=Chat, default_limit=CONF.default_limit.value, context=transaction_ctx)
+chat_member_storage = ChatMemberRepository(
+    model=ChatMember, default_limit=CONF.default_limit.value, context=transaction_ctx
+)
+
+#user_storage = UserPythonStructRepository('users')
+# message_storage = MessagePythonStructRepository('message')
+# chat_storage = ChatPythonStructRepository('chat')
+# chat_member_storage = ChatMemberPythonStructRepository("chat_member")
 
 
 #user_service = UserService(repository=user_storage)
