@@ -1,7 +1,7 @@
-import datetime
-
 import jwt
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
+import datetime
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
+
 
 JWT_PARAMETERS = {
     "lifetime": {'days': 1},
@@ -50,18 +50,6 @@ def is_valid_access_token(token):
             key=JWT_PARAMETERS["key_access_token"],
             algorithms=[JWT_PARAMETERS["algorithms"], ]
         )
-    except (ExpiredSignatureError, InvalidSignatureError, DecodeError):
+    except (ExpiredSignatureError, InvalidSignatureError):
         return False
     return True
-
-
-def get_jwt_by_payload(payload):
-    return jwt.encode(
-        payload=payload,
-        key=JWT_PARAMETERS["key_access_token"],
-        algorithm=JWT_PARAMETERS['algorithms']
-    )
-
-
-def get_decode_jwt_by_payload(token):
-    return jwt.decode(jwt=token, key=JWT_PARAMETERS["key_access_token"], algorithms=['HS256', ])

@@ -14,9 +14,9 @@
 (Kicked member)
 (Leave Chat)
 (Send Message)
-(Get past messages)
+(Get Messages)
 
-User -d-> (Get past messages)
+MemberChat -r-> (Get Messages)
 MemberChat -r-> (Send Message)
 MemberChat -d->(Leave Chat)
 User -d-> (Create POST Chat)
@@ -26,4 +26,6 @@ MemberChat -d-> (Get Description, Title)
 MemberChat -d-> (Get all_members by chat)
 Owner -l-> (Add member in chat)
 Owner -up-> (Kicked member)
+User -> Owner
+Owner -> MemberChat
 @enduml
