@@ -9,3 +9,4 @@ classic-app-layer~=0.0.1
 classic-components~=0.0.1
 classic-aspects~=0.0.1
 pytest==7.1.1
+backports.cached-property==1.0.1
