@@ -3,6 +3,8 @@ from datetime import datetime
 from classic.app.dto import DTO
 from classic.components.component import component
 from sqlalchemy.exc import InvalidRequestError
+from classic.messaging import Publisher, Message
+from adapters.message_bus.settings import ExchangeTopic
 
 from application.dataclases import Chat, User, ChatMember, Message
 from application.errors import BadRequest
@@ -58,6 +60,12 @@ class UserService:
 @component
 class MessageService:
     messages_repo: MessageRepositoryInterface
+    publisher: Publisher
+
+    def _send_message(self, message: str):
+        self.publisher.plan(
+            Message(ExchangeTopic.exchange.value, {'message': message})
+        )
 
     def send_message(self, message: Message):
         message = self.messages_repo.add(message)
