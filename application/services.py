@@ -60,7 +60,7 @@ class UserService:
 @component
 class MessageService:
     messages_repo: MessageRepositoryInterface
-    publisher: Publisher
+    #publisher: Publisher
 
     def _send_message(self, message: str):
         self.publisher.plan(
