@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  web:
+    image: falcon_mysql_test
+    build: .
+    volumes:
+      - .:/app
+    command: gunicorn -c settings.py composites.chat_api:app
+    expose:
+      - "8888"
+    ports:
+      - 8888:8888
+    restart: always
+    networks:
+      - network_falcon_test
+    depends_on:
+      - db
+  db:
+    image: mysql:5.7
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: "bootcamp"
+      MYSQL_USER: "exchange"
+      MYSQL_PASSWORD: "exchange"
+      MYSQL_ROOT_PASSWORD: "exchange"
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - network_falcon_test
+networks:
+  network_falcon_test: {}
