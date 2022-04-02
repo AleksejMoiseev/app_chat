@@ -168,16 +168,13 @@ class ListMessages:
     def on_post_create(self, req: Request, resp: Response):
         user = req.context.user
         params = req.get_media()
-        message = MessageValidator(user_id=user.pk, **params)
+        message = MessageValidator(user_id=user.id, **params)
         chat = self.chat_service.get_chat(message.chat_id)
         if not chat:
             raise BadRequest()
 
-        if not self.chat_member_service.is_member(user.pk, chat.pk):
-            raise BadRequest()
-
+        self.chat_member_service.is_member(user=user, chat=chat)
         message_cleaned_data = message.dict()
-        message = Message(**message_cleaned_data)
-        message_created = self.message_service.send_message(message)
-        resp.body = message_created.dict()
+        message = Message(user=user, chat=chat, body=message_cleaned_data['body'])
+        resp.body = self.message_service.send_message(message)
         resp.status = falcon.HTTP_201

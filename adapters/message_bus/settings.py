@@ -13,6 +13,8 @@ config = dotenv_values(CONF_DIR)
 
 BROKER_URL = f"amqp://{config.get('USER')}:{config.get('PASSWORD')}@{config.get('HOST')}:{config.get('PORT')}//"
 
+MESSAGE_KEY = 'message'
+
 
 class ExchangeTopic(Enum):
     exchange = 'amq.fanout'

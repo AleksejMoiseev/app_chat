@@ -3,7 +3,8 @@ from datetime import datetime
 from classic.app.dto import DTO
 from classic.components.component import component
 from sqlalchemy.exc import InvalidRequestError
-from classic.messaging import Publisher, Message
+from classic.messaging import Publisher
+from classic.messaging import Message as MESSAGE
 from adapters.message_bus.settings import ExchangeTopic
 
 from application.dataclases import Chat, User, ChatMember, Message
@@ -12,6 +13,8 @@ from application.interfaces import (
     UserRepositoryInterface, MessageRepositoryInterface, ChatMembersRepositoryInterface,
     ChatRepositoryInterface,
 )
+from classic.aspects import points
+from adapters.message_bus.settings import MESSAGE_KEY
 
 
 class ChatsChange(DTO):
@@ -62,14 +65,16 @@ class MessageService:
     messages_repo: MessageRepositoryInterface
     publisher: Publisher
 
-    def _send_message(self, message: str):
+    def _send_message(self, body: str):
+        message = {MESSAGE_KEY: body}
         self.publisher.plan(
-            Message(ExchangeTopic.exchange.value, {'message': message})
+            MESSAGE(ExchangeTopic.exchange.value, message)
         )
 
+    @points.join_point
     def send_message(self, message: Message):
-        body = Message.body
-        self._send_message(message=body)
+        body = message.body
+        self._send_message(body=body)
         message = self.messages_repo.add(message)
         return message
 
