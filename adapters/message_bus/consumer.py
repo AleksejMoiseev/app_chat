@@ -5,8 +5,8 @@ from adapters.message_bus import broker_scheme
 from adapters.message_bus.settings import ExchangeTopic
 
 
-def send_message_to_manager(order_number):
-    print(order_number)
+def send_message_to_manager(message):
+    print(message)
 
 
 def create_consumer(connection: Connection) -> KombuConsumer:
