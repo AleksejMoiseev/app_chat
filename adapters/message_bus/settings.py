@@ -12,6 +12,8 @@ CONF_DIR = os.path.join(BASE_DIR, '.env')
 config = dotenv_values(CONF_DIR)
 
 BROKER_URL = f"amqp://{config.get('USER')}:{config.get('PASSWORD')}@{config.get('HOST')}:{config.get('PORT')}//"
+CONSUMER_URL = f"amqp://{config.get('USER')}:{config.get('PASSWORD')}@localhost:{config.get('PORT')}//"
+
 
 MESSAGE_KEY = 'message'
 
@@ -35,6 +37,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings(BROKER_URL=BROKER_URL)
+consumer_settings = Settings(BROKER_URL=CONSUMER_URL)
 
 
 if __name__ == '__main__':

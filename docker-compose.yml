@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    networks:
+      - network_falcon_test
+    volumes:
+      - "rabbitmq_data:/data"
+  web:
+    image: falcon_mysql_test
+    build: .
+    volumes:
+      - .:/app
+    command: gunicorn -c settings.py composites.chat_api:app
+    expose:
+      - "8888"
+    ports:
+      - 8888:8888
+    restart: always
+    networks:
+      - network_falcon_test
+    links:
+      - db
+      - rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+  db:
+    image: mysql:5.7
+    ports:
+      - "3307:3307"
+    environment:
+      MYSQL_DATABASE: "bootcamp"
+      MYSQL_USER: "exchange"
+      MYSQL_PASSWORD: "exchange"
+      MYSQL_ROOT_PASSWORD: "exchange"
+      MYSQL_TCP_PORT: 3307
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - network_falcon_test
+volumes:
+  rabbitmq_data:
+networks:
+  network_falcon_test: {}

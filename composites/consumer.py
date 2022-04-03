@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class MessageBus:
-    settings = message_bus.settings
+    settings = message_bus.consumer_settings
     connection = Connection(settings.BROKER_URL)
     message_bus.broker_scheme.declare(connection)
 
