@@ -1,0 +1,31 @@
+@startuml
+:MemberChat:
+:User:
+:Message:
+:Chat:
+:Owner:
+
+(Create POST Chat)
+(Update PUT Chat)
+(Delete Chat)
+(Get Description, Title)
+(Get all_members by chat)
+(Add member in chat)
+(Kicked member)
+(Leave Chat)
+(Send Message)
+(Get Messages)
+
+MemberChat -r-> (Get Messages)
+MemberChat -r-> (Send Message)
+MemberChat -d->(Leave Chat)
+User -d-> (Create POST Chat)
+Owner -d-> (Update PUT Chat)
+Owner -up-> (Delete Chat)
+MemberChat -d-> (Get Description, Title)
+MemberChat -d-> (Get all_members by chat)
+Owner -l-> (Add member in chat)
+Owner -up-> (Kicked member)
+User -> Owner
+Owner -> MemberChat
+@enduml
