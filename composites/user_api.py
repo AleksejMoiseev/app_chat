@@ -1,8 +1,11 @@
 from classic.aspects import points
+from classic.messaging_kombu import KombuPublisher
 from classic.sql_storage import TransactionContext
 from gevent import monkey, pywsgi
+from kombu import Connection
 from sqlalchemy import create_engine
 
+from adapters import message_bus
 from adapters.database import userdb
 from adapters.database.userdb.settings import CONF
 from adapters.database.userdb.storage import UserRepository
@@ -21,10 +24,24 @@ transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 
 user_storage = UserRepository(model=User, default_limit=CONF.default_limit.value, context=transaction_ctx)
 
-user_service = UserService(repository=user_storage)
+
+class MessageBus:
+    settings = message_bus.settings
+    connection = Connection(settings.BROKER_URL)
+    message_bus.broker_scheme.declare(connection)
+
+    publisher = KombuPublisher(
+        connection=connection,
+        scheme=message_bus.broker_scheme,
+    )
 
 
-points.join(transaction_ctx)
+user_service = UserService(repository=user_storage, publisher=MessageBus.publisher)
+
+
+class Aspects:
+    points.join(MessageBus.publisher, transaction_ctx)
+
 
 app = app.create_app(
     user_service=user_service

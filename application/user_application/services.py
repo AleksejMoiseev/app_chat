@@ -1,13 +1,13 @@
-from datetime import datetime
-
-from classic.components.component import component
-from sqlalchemy.exc import InvalidRequestError
-from classic.messaging import Publisher, Message
-
-from application.user_application.dataclases import User
-from application.errors import BadRequest
-from application.user_application.interfaces import UserRepositoryInterface
 from classic.app.dto import DTO
+from classic.components.component import component
+from classic.messaging import Message
+from classic.messaging import Publisher
+from sqlalchemy.exc import InvalidRequestError
+
+from adapters.message_bus.settings import ExchangeTopic
+from application.errors import BadRequest
+from application.user_application.dataclases import User
+from application.user_application.interfaces import UserRepositoryInterface
 
 
 class UserDTO(DTO):
@@ -30,6 +30,13 @@ class ChangeUser(DTO):
 @component
 class UserService:
     _repository: UserRepositoryInterface
+    publisher: Publisher
+
+    def _send_message(self, body: dict):
+        message = {'message': body}
+        self.publisher.plan(
+            Message(ExchangeTopic.exchange.value, message)
+        )
 
     def register(self, user: User):
         user = self._repository.add(user)
@@ -39,7 +46,8 @@ class UserService:
         user_dto = UserDTO(**data)
         cleaned_data = user_dto.dict()
         user = User(**cleaned_data)
-        return self.user_service.register(user)
+        self._send_message(body=cleaned_data)
+        return self.register(user)
 
     def get_user(self, pk):
         user = self._repository.get(pk)
