@@ -1,7 +1,6 @@
 import datetime
 import json
 
-from application.dto import Model
 from application.user_application.dataclases import BaseModel
 
 
@@ -59,8 +58,6 @@ class BaseJSONEncoder(json.JSONEncoder):
 
 class ChatSerializer(BaseJSONEncoder):
     def default(self, o):
-        if isinstance(o, Model):
-            return o.dict()
         if isinstance(o, BaseModel):
             forbidden_keys = ['_sa_instance_state', 'user']
             result = {}

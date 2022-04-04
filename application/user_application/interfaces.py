@@ -23,6 +23,10 @@ class UserRepositoryInterface(metaclass=abc.ABCMeta):
     def filer_by(self, params):
         pass
 
+    @abc.abstractmethod
+    def update(self, reference, params: dict):
+        pass
+
 
 class ServiceInterface(abc.ABC):
     def __init__(self, repository: UserRepositoryInterface):
