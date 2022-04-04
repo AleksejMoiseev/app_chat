@@ -1,9 +1,9 @@
 from classic.components.component import component
 from classic.sql_storage.repository import BaseRepository
-from sqlalchemy import select, desc, text, func
+from sqlalchemy import select
 
+from application.user_application.dataclases import BaseModel, User
 from application.interfaces import RepositoryInterface
-from application.dataclases import BaseModel, User, Message, Chat, ChatMember
 
 
 @component
@@ -46,26 +46,4 @@ class SQLBaseRepository(RepositoryInterface, BaseRepository):
 @component
 class UserRepository(SQLBaseRepository):
     model: User
-    default_limit: int
-
-
-@component
-class ChatRepository(SQLBaseRepository):
-    model: Chat
-    default_limit: int
-
-
-@component
-class ChatMemberRepository(SQLBaseRepository):
-    model: ChatMember
-    default_limit: int
-
-    def get_members_by_chat(self, chat):
-        result = self.session.query(self.model).filter(chat==chat).all()
-        return result
-
-
-@component
-class MessageRepository(SQLBaseRepository):
-    model: Message
     default_limit: int

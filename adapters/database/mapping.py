@@ -5,8 +5,6 @@ from . import tables
 
 mapper = registry()
 
-mapper.map_imperatively(dataclases.User, tables.users)
-
 
 mapper.map_imperatively(dataclases.Chat, tables.chats, properties={
     'user': relationship(dataclases.User,

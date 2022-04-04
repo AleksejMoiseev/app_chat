@@ -1,19 +1,17 @@
+from classic.aspects import points
+from classic.sql_storage import TransactionContext
 from gevent import monkey, pywsgi
 from sqlalchemy import create_engine
-from adapters.chat_api import app
+
 from adapters import database
-from adapters.storage.storage import (
-    UserPythonStructRepository, MessagePythonStructRepository,
-    ChatMemberPythonStructRepository, ChatPythonStructRepository,
-)
+from adapters.chat_api import app
 from adapters.database.settings import CONF
 from adapters.database.sqlstorage import (
     UserRepository, MessageRepository, ChatRepository, ChatMemberRepository
 )
 from application.dataclases import User, Message, Chat, ChatMember
-from classic.aspects import points
 from application.services import UserService, MessageService, ChatService, ChatMemberService
-from classic.sql_storage import TransactionContext
+
 monkey.patch_all()
 
 engine = create_engine(database.settings.DB_URL, echo=True)

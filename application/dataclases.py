@@ -41,3 +41,10 @@ class ChatMember(BaseModel):
     checked_in: datetime = field(default_factory=datetime.now)
     checked_out: datetime = None
     kicked: datetime = None
+
+
+if __name__ == '__main__':
+    d = {'email': 'Alex@bk.ru', 'password': 'password', 'access_token': None, 'refresh_token': None, 'username': 'Alex'}
+    u = User(email=d['email'], password=d['password'])
+    print(u)
+
