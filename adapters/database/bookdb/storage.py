@@ -3,11 +3,11 @@ from classic.sql_storage.repository import BaseRepository
 from sqlalchemy import select
 
 from application.book_aplication.dataclases import Book, BaseModel
-from application.interfaces import RepositoryInterface
+from application.book_aplication.interfaces import BookRepositoryInterface
 
 
 @component
-class SQLBaseRepository(RepositoryInterface, BaseRepository):
+class SQLBaseRepository(BookRepositoryInterface, BaseRepository):
     model: BaseModel
     default_limit: int
 

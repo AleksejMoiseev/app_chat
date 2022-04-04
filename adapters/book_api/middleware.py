@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from application.user_application.dataclases import BaseModel
+from application.book_aplication.dataclases import BaseModel
 
 
 def _get_duration_components(duration):
