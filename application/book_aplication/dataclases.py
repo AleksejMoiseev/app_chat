@@ -11,5 +11,5 @@ class BaseModel:
 class Book(BaseModel):
     title: str
     author: str
-    status: dict
+    user: int = field(default=None)
     created: datetime = field(default_factory=datetime.now)
