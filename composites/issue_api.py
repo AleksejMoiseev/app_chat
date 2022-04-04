@@ -6,7 +6,7 @@ from kombu import Connection
 from sqlalchemy import create_engine
 
 from adapters import message_bus
-from adapters.database import userdb
+from adapters.database import issuedb
 from adapters.database.issuedb.settings import CONF
 from adapters.database.issuedb.storage import IssueUserRepository
 from adapters.issue_api import app
@@ -15,9 +15,9 @@ from application.issue_aplication.services import IssueUserService
 
 monkey.patch_all()
 
-engine = create_engine(userdb.settings.DB_URL, echo=True)
+engine = create_engine(issuedb.settings.DB_URL, echo=True)
 
-userdb.metadata.create_all(engine)
+issuedb.metadata.create_all(engine)
 
 transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 

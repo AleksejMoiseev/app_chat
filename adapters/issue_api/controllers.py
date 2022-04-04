@@ -3,7 +3,7 @@ from classic.aspects import points
 from classic.components.component import component
 from falcon import Request, Response
 
-from application.errors import BadRequest
+from application.issue_aplication.errors import BadRequest
 from application.issue_aplication.services import IssueUserService
 
 
