@@ -24,7 +24,7 @@ class RabbitConfigKombu(Enum):
 
     exchange = 'amq.direct'
     exchange_type = 'direct'
-    routing_key = 'test'
+    #routing_key = 'test'
     queue = 'My_Queu'
 
 

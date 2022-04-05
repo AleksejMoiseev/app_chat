@@ -2,7 +2,7 @@ from classic.messaging_kombu import KombuConsumer
 from kombu import Connection
 
 from adapters.message_bus import broker_scheme
-from adapters.message_bus.settings import ExchangeTopic
+from adapters.message_bus.settings import RabbitConfigKombu
 
 
 def send_message_to_manager(message):
@@ -15,7 +15,7 @@ def create_consumer(connection: Connection) -> KombuConsumer:
                              scheme=broker_scheme)
 
     consumer.register_function(
-        send_message_to_manager, ExchangeTopic.queue.value,
+        send_message_to_manager, RabbitConfigKombu.queue.value,
     )
 
     return consumer

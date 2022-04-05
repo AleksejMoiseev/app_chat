@@ -11,6 +11,6 @@ books = Table(
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('title', String(30), nullable=False),
     Column('author', String(30), nullable=False),
-    Column('user', Integer, nullable=False, default=None),
+    Column('user', Integer, default=None),
     Column('created', DateTime, nullable=False, default=datetime.now),
 )

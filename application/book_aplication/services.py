@@ -1,31 +1,50 @@
-from datetime import datetime
-
+from classic.app.dto import DTO
 from classic.components.component import component
-from sqlalchemy.exc import InvalidRequestError
 from classic.messaging import Publisher, Message
+from sqlalchemy.exc import InvalidRequestError
 
+from adapters.message_bus.settings import RabbitConfigKombu
 from application.book_aplication.dataclases import Book
 from application.book_aplication.errors import BadRequest
 from application.book_aplication.interfaces import BookRepositoryInterface
-from classic.app.dto import DTO
 
 
 class BookDTO(DTO):
     title: str
     author: str
-    status: dict
+    user: int = None
 
 
 class ChangeBook(DTO):
     id: int
     title: str = None
     author: str =None
-    status: dict = None
+    user: int = None
 
 
 @component
 class BookService:
     _repository: BookRepositoryInterface
+    publisher: Publisher
+
+    def _send_message(self, body: dict):
+        message = {'message': body}
+        self.publisher.plan(
+            Message(RabbitConfigKombu.exchange.value, message)
+        )
+
+    @staticmethod
+    def get_body(event, payload, id, service='user'):
+        events = ['created', 'updated', 'deleted', 'gets']
+        if event not in events:
+            raise BadRequest()
+        body = {
+            "event": event,
+            "service": service,
+            "data": id,
+            "payload": payload
+        }
+        return body
 
     def register(self, book: Book):
         book = self._repository.add(book)
@@ -35,7 +54,12 @@ class BookService:
         book_dto = BookDTO(**data)
         cleaned_data = book_dto.dict()
         book = Book(**cleaned_data)
-        return self.user_service.register(book)
+        new_book = self.register(book)
+        id = new_book.id
+        cleaned_data['id'] = id
+        body = self.get_body(event='created', id=id, payload=cleaned_data)
+        self._send_message(body=body)
+        return new_book
 
     def get_book(self, pk):
         book = self._repository.get(pk)
@@ -61,7 +85,12 @@ class BookService:
     def delete_book(self, data):
         cleaned_data = self.cleaned_data(data=data)
         id = cleaned_data['id']
-        return self._repository.delete(id)
+        deleted = self._repository.delete(id)
+        if deleted:
+            payload = {"deleted": f"book - {id} - success"}
+            body = self.get_body(event='deleted', id=id, payload=payload)
+            self._send_message(body=body)
+        return deleted
 
     def update_book(self, data):
         cleaned_data = self.cleaned_data(data=data)

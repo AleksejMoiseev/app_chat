@@ -1,14 +1,16 @@
 from classic.aspects import points
 from classic.sql_storage import TransactionContext
 from gevent import monkey, pywsgi
+from kombu import Connection
 from sqlalchemy import create_engine
-
+from classic.messaging_kombu import KombuPublisher
+from adapters.book_api import app
 from adapters.database import bookdb
 from adapters.database.bookdb.settings import CONF
 from adapters.database.bookdb.storage import BookRepository
-from adapters.book_api import app
 from application.book_aplication.dataclases import Book
 from application.book_aplication.services import BookService
+from adapters import message_bus
 
 monkey.patch_all()
 
@@ -21,10 +23,24 @@ transaction_ctx = TransactionContext(bind=engine, expire_on_commit=False)
 
 book_storage = BookRepository(model=Book, default_limit=CONF.default_limit.value, context=transaction_ctx)
 
-book_service = BookService(repository=book_storage)
+
+class MessageBus:
+    settings = message_bus.settings
+    connection = Connection(settings.BROKER_URL)
+    message_bus.broker_scheme.declare(connection)
+
+    publisher = KombuPublisher(
+        connection=connection,
+        scheme=message_bus.broker_scheme,
+    )
 
 
-points.join(transaction_ctx)
+book_service = BookService(repository=book_storage, publisher=MessageBus.publisher)
+
+
+class Aspects:
+    points.join(MessageBus.publisher, transaction_ctx)
+
 
 app = app.create_app(
     service=book_service
