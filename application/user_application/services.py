@@ -27,6 +27,16 @@ class ChangeUser(DTO):
     username: str = None
 
 
+"""
+body = {
+    'event': str,
+    'service': str,
+    'id': int,
+    'payload':{}
+}
+"""
+
+
 @component
 class UserService:
     _repository: UserRepositoryInterface
@@ -34,6 +44,7 @@ class UserService:
 
     def _send_message(self, body: dict):
         message = {'message': body}
+        print('!!!!!', message)
         self.publisher.plan(
             Message(ExchangeTopic.exchange.value, message)
         )
@@ -42,19 +53,43 @@ class UserService:
         user = self._repository.add(user)
         return user
 
+    @staticmethod
+    def get_body(event, payload, id, service='user'):
+        events = ['created', 'updated', 'deleted', 'gets']
+        if event not in events:
+            raise BadRequest()
+        body = {
+            "event": event,
+            "service": service,
+            "data": id,
+            "payload": payload
+        }
+        return body
+
     def create_user(self, data):
         user_dto = UserDTO(**data)
         cleaned_data = user_dto.dict()
         user = User(**cleaned_data)
-        self._send_message(body=cleaned_data)
+        new_user = self.register(user)
+        id = new_user.id
+        cleaned_data['id'] = id
+        body = self.get_body(event='created', id=id, payload=cleaned_data)
+        self._send_message(body=body)
         return self.register(user)
 
     def get_user(self, pk):
         user = self._repository.get(pk)
+        id = user.id
+        payload = {'id': id}
+        body = self.get_body(event='gets', id=id, payload=payload)
+        self._send_message(body=body)
         return user
 
     def get_users(self, limit=None, offset=None, **params):
         users = self._repository.get_list(limit=limit, offset=offset, **params)
+        payload = {k: v.id for k, v in enumerate(users)}
+        body = self.get_body(event='gets', id=None, payload=payload)
+        self._send_message(body=body)
         return users
 
     def filer_by(self, params):
@@ -73,7 +108,12 @@ class UserService:
     def delete_user(self, data):
         cleaned_data = self.cleaned_data(data=data)
         id = cleaned_data['id']
-        return self._repository.delete(id)
+        deleted = self._repository.delete(id)
+        if deleted:
+            payload = {"deleted": f"user - {id} - success"}
+            body = self.get_body(event='deleted', id=id, payload=payload)
+            self._send_message(body=body)
+        return deleted
 
     def update_user(self, data):
         cleaned_data = self.cleaned_data(data=data)

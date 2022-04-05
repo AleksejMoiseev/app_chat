@@ -5,8 +5,6 @@ from falcon import Request, Response
 
 from application.user_application.errors import BadRequest
 from application.user_application.services import UserService
-from application.user_application.services import UserDTO
-from application.user_application.dataclases import User
 
 
 @component
@@ -34,11 +32,13 @@ class Users:
         resp.body = result
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_get_list(self, req: Request, resp: Response):
         users = self.user_service.get_users()
         resp.body = users
         resp.status = falcon.HTTP_200
 
+    @points.join_point
     def on_get_one(self, req: Request, resp: Response):
         id = req.get_param_as_int('id')
         user = self.user_service.get_user(id)
