@@ -44,7 +44,6 @@ class UserService:
 
     def _send_message(self, body: dict):
         message = {'message': body}
-        print('!!!!!', message)
         self.publisher.plan(
             Message(ExchangeTopic.exchange.value, message)
         )
@@ -79,17 +78,10 @@ class UserService:
 
     def get_user(self, pk):
         user = self._repository.get(pk)
-        id = user.id
-        payload = {'id': id}
-        body = self.get_body(event='gets', id=id, payload=payload)
-        self._send_message(body=body)
         return user
 
     def get_users(self, limit=None, offset=None, **params):
         users = self._repository.get_list(limit=limit, offset=offset, **params)
-        payload = {k: v.id for k, v in enumerate(users)}
-        body = self.get_body(event='gets', id=None, payload=payload)
-        self._send_message(body=body)
         return users
 
     def filer_by(self, params):
