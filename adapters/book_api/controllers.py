@@ -44,3 +44,18 @@ class Books:
             raise BadRequest()
         resp.body = book
         resp.status = falcon.HTTP_200
+
+    @points.join_point
+    def on_post_take(self, req: Request, resp: Response):
+        data = req.get_media()
+        result = self.service.get_free_book(data)
+        resp.body = result
+        resp.status = falcon.HTTP_200
+
+    @points.join_point
+    def on_post_give(self, req: Request, resp: Response):
+        data = req.get_media()
+        result = self.service.give_away_book(data)
+        resp.body = result
+        resp.status = falcon.HTTP_200
+

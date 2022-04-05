@@ -22,6 +22,13 @@ class ChangeBook(DTO):
     user: int = None
 
 
+class SearchBook(DTO):
+    id: int = None
+    title: str = None
+    author: str = None
+    user: int = None
+
+
 @component
 class BookService:
     _repository: BookRepositoryInterface
@@ -77,13 +84,13 @@ class BookService:
         return entity_model
 
     @staticmethod
-    def cleaned_data(data, model=ChangeBook):
+    def cleaned_data(data, model):
         validate_data = model(**data)
         cleaned_data = validate_data.dict()
         return cleaned_data
 
     def delete_book(self, data):
-        cleaned_data = self.cleaned_data(data=data)
+        cleaned_data = self.cleaned_data(data=data, model=ChangeBook)
         id = cleaned_data['id']
         deleted = self._repository.delete(id)
         if deleted:
@@ -93,9 +100,55 @@ class BookService:
         return deleted
 
     def update_book(self, data):
-        cleaned_data = self.cleaned_data(data=data)
+        cleaned_data = self.cleaned_data(data=data, model=ChangeBook)
         id = cleaned_data['id']
         prepare_data = {
             key: value for key, value in cleaned_data.items() if value is not None and key != 'id'
         }
         return self._repository.update(reference=id, params=prepare_data)
+
+    def get_free_book(self, data):
+        user = data.get('user')
+        if not user:
+            raise BadRequest()
+        cleaned_data = self.cleaned_data(data=data, model=SearchBook)
+        cleaned_data = {
+            key: value for key, value in cleaned_data.items() if value is not None
+        }
+        cleaned_data['user'] = None
+        book = self._repository.filer_by(cleaned_data)
+        if not book:
+            raise BadRequest()
+        reference = book.id
+        params = {"user": user}
+        updated = self._repository.update(reference=reference, params=params)
+        if not updated:
+            raise BadRequest()
+        payload = {"result": f"book - {reference} - take user {user}"}
+        body = self.get_body(event='created', id=reference, payload=payload)
+        self._send_message(body)
+        return book
+
+    def give_away_book(self, data):
+        user = data.get('user')
+        if not user:
+            raise BadRequest()
+        cleaned_data = self.cleaned_data(data=data, model=SearchBook)
+        cleaned_data = {
+            key: value for key, value in cleaned_data.items() if value is not None
+        }
+        cleaned_data['user'] = user
+        book = self._repository.filer_by(cleaned_data)
+        if not book:
+            raise BadRequest()
+        reference = book.id
+
+        payload = {"result": f"book - {reference} - give away user {user}"}
+        body = self.get_body(event='created', id=reference, payload=payload)
+
+        params = {"user": None}
+        updated = self._repository.update(reference=reference, params=params)
+        if not updated:
+            raise BadRequest()
+        self._send_message(body)
+        return book
