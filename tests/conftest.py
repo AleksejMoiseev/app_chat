@@ -6,10 +6,6 @@ from application.user_application import interfaces
 from application.user_application.dataclases import User
 from application.user_application.services import UserService
 
-ACCESS_TOKEN = " Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwayI6MH0.99Q7zHnAZVqblwg93gjXYRCB-LmOuhfWjWWqx0ei5fg"
-REFRESH_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" \
-                ".eyJleHAiOjE2NDc1ODcxNzJ9.H2gTn-_QYxegb8lO7yHFpk-ntZN7hp0X5jDt6fU0izk"
-
 
 @pytest.fixture
 def username_password():
@@ -22,19 +18,13 @@ def email():
 
 
 @pytest.fixture
-def headers_auth():
-    headers = {'Authorization': ACCESS_TOKEN}
-    return headers
-
-
-@pytest.fixture
 def params(email, username_password):
     username, password = username_password
     return {
         'username': username,
         'email': email,
         'password': password,
-        'access_token': ACCESS_TOKEN
+        'access_token': None
     }
 
 
