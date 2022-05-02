@@ -15,9 +15,11 @@ class CONF(enum.Enum):
 
 
 config = dotenv_values(CONF_DIR)
-DB_URL = f"mysql://{config.get('DB_USER')}:{config.get('DB_PASSWORD')}@{config.get('DB_HOST')}" \
-         f":{config.get('DB_PORT')}/{config.get('DB_DATABASE')}"
+# DB_URL = f"mysql://{config.get('DB_USER')}:{config.get('DB_PASSWORD')}@{config.get('DB_HOST')}" \
+#          f":{config.get('DB_PORT')}/{config.get('DB_DATABASE')}"
 
+#DB_URL = 'mysql://exchange:exchange@localhost:3306/bootcamp'
+DB_URL = "postgresql+psycopg2://selectel:selectel@localhost:5432/selectel"
 
 class DBSettings(BaseSettings):
     DB_URL: str = DB_URL

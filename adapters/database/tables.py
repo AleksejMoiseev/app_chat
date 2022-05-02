@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    MetaData, Table, Column, Integer, String, ForeignKey, Text, DateTime
+    MetaData, Table, Column, Integer, VARCHAR, ForeignKey, Text, DateTime
 )
 
 metadata = MetaData()
@@ -9,11 +9,11 @@ metadata = MetaData()
 users = Table(
     'users', metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('username', String(30)),
-    Column('email', String(30), nullable=False),
-    Column('password', String(30), nullable=False),
-    Column('access_token', String(128)),
-    Column('refresh_token', String(128)),
+    Column('username', VARCHAR(250)),
+    Column('email', VARCHAR(250), nullable=False),
+    Column('password', VARCHAR(250), nullable=False),
+    Column('access_token', VARCHAR(250)),
+    Column('refresh_token', VARCHAR(250)),
 )
 
 chats = Table(
