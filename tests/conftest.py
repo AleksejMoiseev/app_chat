@@ -136,7 +136,7 @@ def params_chat(owner):
     return {
         'title': "title",
         'descriptions': 'descriptions',
-        'owner': owner.pk
+        'user': owner.pk
     }
 
 
@@ -203,6 +203,7 @@ def chat_member_repo(chat_member0, chat_members):
     chat_member_repo.get = Mock(return_value=chat_member0)
     chat_member_repo.get_list = Mock(return_value=chat_members)
     chat_member_repo.delete = Mock(return_value=chat_member0)
+    chat_member_repo.get_members_by_chat = Mock(return_value=[chat_member0])
     return chat_member_repo
 
 

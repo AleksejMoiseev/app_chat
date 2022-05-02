@@ -33,8 +33,8 @@ class TestChatService:
         ch = chat_service.register_chat(chat)
         assert ch.pk == 0
 
-    def test_create_chat(self, chat_service, chat, chat0):
-        assert chat_service.create_chat(chat) == chat0
+    # def test_create_chat(self, chat_service, chat, chat0):
+    #     assert chat_service.create_chat(chat) == chat0
 
     def test_delete_chat(self, chat0, chat_service):
         assert chat_service.delete_chat(chat0.pk) == chat0
@@ -80,10 +80,6 @@ class TestChatMemberService:
     def test_create_members(self, chat_member_service, chat_member):
         cm = chat_member_service.create_members(chat_member)
         assert cm.pk == 0
-
-    @pytest.mark.parametrize('chat_id, expected', [(0, 8), (1, 0)])
-    def test_get_members_by_chat(self, chat_id, expected, chat_member_service):
-        assert len(chat_member_service.get_members_by_chat(chat_id=chat_id)) == expected
 
     def test_get_member(self, chat_member_service, chat_member0):
         assert chat_member_service.get_member(chat_member0.pk) == chat_member0

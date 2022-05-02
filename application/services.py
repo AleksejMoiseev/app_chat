@@ -175,7 +175,7 @@ class ChatMemberService:
 
     @staticmethod
     def is_owner(owner, chat):
-        if owner.id == chat.user:
+        if owner.pk == chat.user:
             return True
         return False
 

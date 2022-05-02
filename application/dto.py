@@ -21,7 +21,7 @@ class User(Model):
 
 class Chat(Model):
     title: str
-    owner: int
+    user: int
     descriptions: Text
     created: datetime = Field(default_factory=datetime.now)
 
