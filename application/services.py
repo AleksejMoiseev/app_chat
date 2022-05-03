@@ -106,8 +106,8 @@ class ChatService:
         self.members_repo.add(chat_member)
         return chat
 
-    def create_chat(self, user_id, data):
-        chat = Chat(user=user_id, **data)
+    def create_chat(self, user, data):
+        chat = Chat(user=user, **data)
         return self._create_chat(chat)
 
     def _delete_chat(self, pk):
@@ -192,11 +192,3 @@ class ChatMemberService:
     def add_member_to_chat(self, member: ChatMember):
         return self.create_members(member)
 
-
-if __name__ == '__main__':
-   c = ChatsChange(id=1, title='sss')
-   print(c.dict())
-   from application.dataclases import Chat
-   cl = c.dict()
-   ch = Chat(**cl)
-   print(ch)

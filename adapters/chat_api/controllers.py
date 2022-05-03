@@ -6,19 +6,30 @@ from classic.aspects import points
 from application.dataclases import Message, ChatMember
 from application.errors import BadRequest
 from application.services import ChatService
+from application.interfaces import ServiceInterface
 from application.services import (
 
     ChatsChange, MessageValidator, ChatMemberValidator, ChatMemberService, MessageService
 )
 
+from evraz.classic.http_auth import (
+    authenticate,
+    authenticator_needed,
+    authorize,
+)
 
+
+@authenticator_needed
 @component
 class Chats:
     chat_service: ChatService
+    user_service: ServiceInterface
 
     @points.join_point
+    @authenticate
     def on_post_create(self, req: Request, resp: Response):
-        user = req.context.user
+        user_id = req.context.client.user_id
+        user = self.user_service.get_user(user_id)
         data = req.get_media()
         chat = self.chat_service.create_chat(user, data)
         resp.body = chat

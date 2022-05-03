@@ -26,7 +26,7 @@ class RegisterUser:
         user = User(**cleaned_data)
         user = self.user_service.register(user)
         user.refresh_token, _ = get_jwt_token()
-        user.access_token = get_jwt_by_payload({'id': user.id})
+        user.access_token = get_jwt_by_payload({'sub': user.id, 'preferred_username': user.email, 'name': user.username})
         resp.status = falcon.HTTP_200
         resp.body = {
             'id': user.id,
